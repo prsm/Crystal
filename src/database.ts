@@ -1,0 +1,56 @@
+import { ConnectionOptions, createConnection, Connection, Repository } from 'typeorm';
+
+import config from './config';
+import { Config } from './entities/config';
+import { ReactionRole } from './entities/reactionRole';
+import { Event } from './entities/event';
+
+// database options
+const options: ConnectionOptions = {
+    type: 'sqlite',
+    database: `${config.rootPath}/database/ibois.db`,
+    entities: [Config, ReactionRole, Event],
+    logging: config.DBLogging
+}
+
+export class BotDatabase {
+
+    private _connection: Connection;
+
+    private _configRepository: Repository<Config>;
+
+    private _reactionRoleRepository: Repository<ReactionRole>;
+    private _eventRepository: Repository<Event>;
+
+    public async initConnection(): Promise<BotDatabase> {
+        // init connection to database
+        this._connection = await createConnection(options);
+
+        // check if all tables are correct and generate scaffolding
+        await this._connection.synchronize();
+
+        // save repository to property
+        this._configRepository = this._connection.getRepository(Config);
+        this._reactionRoleRepository = this._connection.getRepository(ReactionRole);
+        this._eventRepository = this._connection.getRepository(Event);
+
+        return this;
+    }
+
+    // getter for the database connection
+    public getConnection(): Connection {
+        return this._connection;
+    }
+
+    public getConfigRepository(): Repository<Config> {
+        return this._configRepository;
+    }
+
+    public getReactionRoleRepository(): Repository<ReactionRole> {
+        return this._reactionRoleRepository;
+    }
+
+    public getEventRepository(): Repository<Event> {
+        return this._eventRepository;
+    }
+}
