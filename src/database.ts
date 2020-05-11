@@ -8,7 +8,7 @@ import { Event } from './entities/event';
 // database options
 const options: ConnectionOptions = {
     type: 'sqlite',
-    database: `${config.rootPath}/database/ibois.db`,
+    database: `./database/ibois.db`,
     entities: [Config, ReactionRole, Event],
     logging: config.DBLogging
 }

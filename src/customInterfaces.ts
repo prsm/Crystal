@@ -32,6 +32,8 @@ export interface BotConfig {
     eventChannelID: string,
     twitchStreamChannelID: string,
     twitchRoleID: string,
+    callbackURL: string,
+    callbackPort: number,
     streamIDs: number[],
     botOwnerID: string,
     botToken: string,
@@ -41,7 +43,6 @@ export interface BotConfig {
     botID: string,
     rootPath: string,
     DBLogging: boolean,
-    expressPort: number,
     landingChannelID: string,
     logChannelID: string
 }

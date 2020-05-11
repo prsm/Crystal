@@ -1,6 +1,6 @@
 import { Client, TextChannel } from 'discord.js';
 import express from 'express';
-import rp from 'request-promise';
+import fetch from 'node-fetch';
 import { Repository } from 'typeorm';
 
 import { iBot } from '../bot';
@@ -19,6 +19,8 @@ export class TwitchHandler {
 
     private _configRepository: Repository<Config>;
 
+    private _logChannel: TextChannel;
+
     constructor(private _botClient: iBot) {
         this._client = this._botClient.getClient();
         this._configRepository = this._botClient.getDatabase().getConfigRepository();
@@ -33,12 +35,13 @@ export class TwitchHandler {
         if (twitchTokenConfig) this._twitchToken = twitchTokenConfig.value;
 
         this._twitchChannel = this._client.channels.cache.get(config.twitchStreamChannelID) as TextChannel;
+        this._logChannel = this._botClient.getClient().channels.cache.get(config.logChannelID) as TextChannel;
 
         // set up express listeners for webhooks
         this._listenToWebhooks();
 
         // start express app
-        this._app.listen(config.expressPort);
+        this._app.listen(config.callbackPort);
         this._initWebhooks();
     }
 
@@ -64,8 +67,11 @@ export class TwitchHandler {
     private async _initWebhooks() {
         // Twitch wants to validate the token on a regular basis.
         // More info here: https://dev.twitch.tv/docs/authentication#validating-requests
-        await this._validateToken();
-
+        const validToken = await this._validateToken();
+        if (!validToken) {
+            this._logChannel.send(':warning: Twitch token is invalid.');
+            return;
+        }
         this._subscribeToWebhooks();
 
         // resubscribe to webhooks after 9 days
@@ -78,18 +84,16 @@ export class TwitchHandler {
         if (!this._twitchToken) {
             // TODO
             this._createTwitchToken();
-            return;
+            return false;
         }
 
         let options = {
             method: 'GET',
-            uri: `https://id.twitch.tv/oauth2/validate`,
             headers: {
                 'authorization': `OAuth ${this._twitchToken}`
-            },
-            json: true
+            }
         };
-        await rp(options).catch(async (err) => {
+        const result = await fetch('https://id.twitch.tv/oauth2/validate', options).catch(async (err) => {
             if (err.statusCode === 401) {
                 // TODO
                 await this._renewToken();
@@ -97,28 +101,29 @@ export class TwitchHandler {
                 console.error(err);
             }
         });
+        return result ? true : false;
     }
 
     private async _subscribeToWebhooks() {
-        // the subscribtions last 10 days, but i renew each after 9 days
+        const body = {
+            'hub.mode': 'subscribe',
+            'hub.callback': `http://${config.callbackURL}:${config.callbackPort}/stream`,
+            'hub.lease_seconds': 864000,
+            'hub.topic': ''
+        };
+        // the subscriptions last 10 days, but i renew each after 9 days
         let options = {
             method: 'POST',
-            uri: `https://api.twitch.tv/helix/webhooks/hub`,
-            body: {
-                'hub.mode': 'subscribe',
-                'hub.callback': 'http://jannik66.ddns.net:7777/stream',
-                'hub.lease_seconds': 864000,
-                'hub.topic': ''
-            },
+            body: '',
             headers: {
                 'authorization': `Bearer ${this._twitchToken}`
-            },
-            json: true
+            }
         };
 
         for (const userId of config.streamIDs) {
-            options.body['hub.topic'] = `https://api.twitch.tv/helix/streams?user_id=${userId}`;
-            await rp(options);
+            body["hub.topic"] = `https://api.twitch.tv/helix/streams?user_id=${userId}`;
+            options.body = JSON.stringify(body);
+            await fetch(`https://api.twitch.tv/helix/webhooks/hub`, options);
         }
     }
 
