@@ -24,7 +24,7 @@ export interface BotCommand {
  * General Config
  */
 export interface BotConfig {
-    iboisGuildID: string,
+    juicyyGuildID: string,
     memberRoleID: string,
     welcomeChannelID: string,
     dynamicVoiceCategoryID: string,

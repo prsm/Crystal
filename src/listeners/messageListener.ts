@@ -1,6 +1,6 @@
 import { Message, Client, GuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import config from '../config';
 
 export class MessageListener {
@@ -11,7 +11,7 @@ export class MessageListener {
 
     private _landingChannel: TextChannel;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
 
         this._prefix = config.prefix;
@@ -68,7 +68,7 @@ export class MessageListener {
     public async welcomeMessage(msg: Message) {
         msg.delete();
         if (msg.member.roles.cache.get(config.memberRoleID)) {
-            msg.channel.send('You are already a Member of ibois!').then((botMsg) => {
+            msg.channel.send('You are already a Member of juicyy!').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);
             });
             return;

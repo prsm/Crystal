@@ -1,13 +1,13 @@
 import { GuildMember, PartialGuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import config from '../config';
 
 export class GuildMemberListener {
 
     private _landingChannel: TextChannel;
 
-    constructor(private _botClient: iBot) { }
+    constructor(private _botClient: juicepress) { }
 
     public init() {
         this._landingChannel = this._botClient.getClient().channels.cache.get(config.landingChannelID) as TextChannel;

@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 // @ts-ignore
 import * as chrono from 'chrono-node';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { BotCommand } from '../customInterfaces';
 
 export default class createEventCommand implements BotCommand {
@@ -39,7 +39,7 @@ export default class createEventCommand implements BotCommand {
         'yellow': '#FFFF00'
     };
 
-    constructor(private _botClient: iBot) { }
+    constructor(private _botClient: juicepress) { }
 
     public async execute(msg: Message, args: string[], prefix: string) {
         const events = await this._botClient.getDatabase().getEventRepository().find();

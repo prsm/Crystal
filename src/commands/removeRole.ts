@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { ReactionRole } from '../entities/reactionRole';
 import { BotCommand } from '../customInterfaces';
 
@@ -21,7 +21,7 @@ export default class createRoleCommand implements BotCommand {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
     }
 

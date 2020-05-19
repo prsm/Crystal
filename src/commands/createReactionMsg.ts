@@ -1,7 +1,7 @@
 import { Message, MessageEmbed, Client } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { Config } from '../entities/config';
 import { ReactionRole } from '../entities/reactionRole';
 import config from '../config';
@@ -27,7 +27,7 @@ export default class createReactionMsgCommand implements BotCommand {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
         this._configRepository = this._botClient.getDatabase().getConfigRepository();
         this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
@@ -46,7 +46,7 @@ export default class createReactionMsgCommand implements BotCommand {
         }
         let fieldString = '';
         for (const role of roles) {
-            fieldString += `${this._client.guilds.cache.get(config.iboisGuildID).emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
+            fieldString += `${this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
         }
         embed.addField('Roles', fieldString);
         const reactionMsg = await msg.channel.send(embed);
@@ -59,7 +59,7 @@ export default class createReactionMsgCommand implements BotCommand {
 
     private async _react(msg: Message, roles: ReactionRole[]) {
         for (const role of roles) {
-            await msg.react(this._client.guilds.cache.get(config.iboisGuildID).emojis.cache.get(role.emojiID));
+            await msg.react(this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(role.emojiID));
         }
     }
 }

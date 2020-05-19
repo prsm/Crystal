@@ -2,7 +2,7 @@ import { Client, MessageEmbed, CategoryChannel, TextChannel, GuildChannelManager
 import { Repository } from 'typeorm';
 import moment from 'moment';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { Event } from '../entities/event';
 import { User as UserEntity } from '../entities/user';
 import config from '../config';
@@ -27,7 +27,7 @@ export class EventHandler {
     private _channelManager: GuildChannelManager;
 
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
         this._eventRepository = this._botClient.getDatabase().getEventRepository();
         this._userRepository = this._botClient.getDatabase().getUserRepository();
@@ -35,7 +35,7 @@ export class EventHandler {
 
     public async init() {
         // channel manager for creating new channels
-        this._channelManager = new GuildChannelManager(this._client.guilds.cache.get(config.iboisGuildID));
+        this._channelManager = new GuildChannelManager(this._client.guilds.cache.get(config.juicyyGuildID));
 
         // event category
         this._eventCategory = this._client.channels.cache.get(config.eventCategoryID) as CategoryChannel;
@@ -55,7 +55,7 @@ export class EventHandler {
             infos += `**Date**: ${event.withTime ? moment(event.date).format('DD.MM.YYYY HH:mm') : moment(event.date).format('DD.MM.YYYY')}\n`;
         }
         if (event.channel && event.channel.create) {
-            role = await this._client.guilds.cache.get(config.iboisGuildID).roles.create({ data: { name: event.channel.name ? event.channel.name : event.title } });
+            role = await this._client.guilds.cache.get(config.juicyyGuildID).roles.create({ data: { name: event.channel.name ? event.channel.name : event.title } });
             channel = await this._channelManager.create(event.channel.name ? event.channel.name : event.title, {
                 parent: this._eventCategory,
                 permissionOverwrites: [
@@ -124,7 +124,7 @@ export class EventHandler {
                     }
                     break;
                 case '❌':
-                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.iboisGuildID).members.cache.get(user.id).hasPermission('MANAGE_GUILD')) {
+                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.juicyyGuildID).members.cache.get(user.id).hasPermission('MANAGE_GUILD')) {
                         this._deleteEvent(event);
                     }
                     break;
@@ -184,7 +184,7 @@ export class EventHandler {
         this._eventChannel.messages.cache.get(event.eventMessageID).delete();
         if (event.channelID) {
             this._client.channels.cache.get(event.channelID).delete();
-            this._client.guilds.cache.get(config.iboisGuildID).roles.cache.get(event.roleID).delete();
+            this._client.guilds.cache.get(config.juicyyGuildID).roles.cache.get(event.roleID).delete();
         }
         for (const reminderMsg of event.reminderMsgs) {
             this._eventChannel.messages.cache.get(reminderMsg.messageId).delete();

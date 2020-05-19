@@ -1,6 +1,6 @@
 import { Client, TextChannel, Message } from 'discord.js';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import config from '../config';
 
 export class ReactionRoleMsgHandler {
@@ -12,7 +12,7 @@ export class ReactionRoleMsgHandler {
     private _reactionRoleChannel: { key: string, value: string };
     private _reactionRoleMsgId: { key: string, value: string };
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
     }
 
@@ -39,13 +39,13 @@ export class ReactionRoleMsgHandler {
         for (const role of roles) {
             if (!this._reactionRoleMsg.reactions.cache.find(r => r.emoji.id == role.emojiID)) {
                 embed.fields = [];
-                await this._reactionRoleMsg.react(this._client.guilds.cache.get(config.iboisGuildID).emojis.cache.get(role.emojiID));
+                await this._reactionRoleMsg.react(this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(role.emojiID));
             }
         }
         const reactions = this._reactionRoleMsg.reactions.cache;
         for (const reaction of reactions) {
             if (roles.find(r => r.emojiID === reaction[0])) {
-                rolesMsg += `\n${this._client.guilds.cache.get(config.iboisGuildID).emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}**`;
+                rolesMsg += `\n${this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}**`;
             } else {
                 console.log(`WARNING: Not role for emoji ${reaction[0]} found...`);
                 //this._reactionRoleMsg.reactions.cache.get(reaction[0]).remove();

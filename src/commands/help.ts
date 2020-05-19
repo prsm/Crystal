@@ -1,6 +1,6 @@
 import { Message, Collection, MessageEmbed, Client } from 'discord.js';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { BotCommand } from '../customInterfaces';
 
 export default class helpCommand implements BotCommand {
@@ -21,7 +21,7 @@ export default class helpCommand implements BotCommand {
 
     private _commands: Collection<string, BotCommand>;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
         this._commands = this._botClient.getAllCommands();
     }

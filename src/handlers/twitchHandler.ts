@@ -3,7 +3,7 @@ import express from 'express';
 import fetch from 'node-fetch';
 import { Repository } from 'typeorm';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { Config } from '../entities/config';
 import config from '../config';
 
@@ -21,7 +21,7 @@ export class TwitchHandler {
 
     private _logChannel: TextChannel;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
         this._configRepository = this._botClient.getDatabase().getConfigRepository();
 

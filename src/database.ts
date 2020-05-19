@@ -10,7 +10,7 @@ import { ReminderMsg } from './entities/reminderMsg';
 // database options
 const options: ConnectionOptions = {
     type: 'sqlite',
-    database: `./database/ibois.db`,
+    database: `./database/juicyy.db`,
     entities: [Config, ReactionRole, Event, User, ReminderMsg],
     logging: config.DBLogging
 }

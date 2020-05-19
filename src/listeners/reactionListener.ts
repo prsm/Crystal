@@ -1,7 +1,7 @@
 import { User, MessageReaction } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { EventHandler } from '../handlers/eventHandler';
 import { ReactionRole } from '../entities/reactionRole';
 import config from '../config';
@@ -11,7 +11,7 @@ export class ReactionListener {
     private _reactionRoleRepository: Repository<ReactionRole>;
     private _eventHandler: EventHandler;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
         this._eventHandler = this._botClient.getEventHandler();
     }

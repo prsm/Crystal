@@ -2,7 +2,7 @@ import { Client, TextChannel, Message } from 'discord.js';
 import moment from 'moment';
 import ns from 'node-schedule';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import config from '../config';
 import { Repository } from 'typeorm';
 import { Event } from '../entities/event';
@@ -17,7 +17,7 @@ export class ReminderHandler {
 
     private _eventChannel: TextChannel;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
         this._eventRepository = this._botClient.getDatabase().getEventRepository();
     }

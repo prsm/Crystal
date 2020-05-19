@@ -1,6 +1,6 @@
 import { VoiceState, VoiceChannel, GuildChannelManager, CategoryChannel } from 'discord.js';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import config from '../config';
 
 export class VoiceChannelListener {
@@ -14,7 +14,7 @@ export class VoiceChannelListener {
     // all relevant voice channels with name and connected user count
     private _voiceChannels: { id: string, name: string, connectedUserCount: number }[] = [];
 
-    constructor(private _botClient: iBot) { }
+    constructor(private _botClient: juicepress) { }
 
     public async evalVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
         // if user changed the voice channel (join, leave, channel switch)
@@ -42,7 +42,7 @@ export class VoiceChannelListener {
     // init parameters
     public async loadVoiceChannels() {
         // channel manager for creating new channels
-        this._channelManager = new GuildChannelManager(this._botClient.getClient().guilds.cache.get(config.iboisGuildID));
+        this._channelManager = new GuildChannelManager(this._botClient.getClient().guilds.cache.get(config.juicyyGuildID));
 
         // dynamic voice category
         this._dynamicCategory = this._botClient.getClient().channels.cache.get(config.dynamicVoiceCategoryID) as CategoryChannel;

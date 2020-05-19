@@ -14,7 +14,7 @@ import { VoiceChannelListener } from './listeners/voiceChannelListener';
 import { BotCommand } from './customInterfaces';
 import config from './config';
 
-export class iBot {
+export class juicepress {
     // Discord Client of the Bot
     private _client: Client;
 

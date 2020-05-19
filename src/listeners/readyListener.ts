@@ -1,8 +1,8 @@
-import { iBot } from "../bot";
+import { juicepress } from "../bot";
 
 export class ReadyListener {
 
-    constructor(private _botClient: iBot) { }
+    constructor(private _botClient: juicepress) { }
 
     public async evalReady() {
         console.log(`Logged in as ${this._botClient.getClient().user.tag}`);

@@ -1,7 +1,7 @@
 import { Message, Client, Role } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { iBot } from '../bot';
+import { juicepress } from '../bot';
 import { ReactionRole } from '../entities/reactionRole';
 import config from '../config';
 import { BotCommand } from '../customInterfaces';
@@ -24,7 +24,7 @@ export default class createRoleCommand implements BotCommand {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
 
-    constructor(private _botClient: iBot) {
+    constructor(private _botClient: juicepress) {
         this._client = this._botClient.getClient();
         this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
     }
@@ -36,9 +36,9 @@ export default class createRoleCommand implements BotCommand {
             return;
         }
         const emojiID = args[1].match(/<:\S*:(\d*)>/)[1];
-        const emoji = this._client.guilds.cache.get(config.iboisGuildID).emojis.cache.get(emojiID);
+        const emoji = this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(emojiID);
         if (!emoji) {
-            msg.channel.send(':x: Emoji not found on ibois server.')
+            msg.channel.send(':x: Emoji not found on  server.')
             return;
         }
         const reactionRoles = await this._reactionRoleRepository.find();
@@ -48,13 +48,13 @@ export default class createRoleCommand implements BotCommand {
         }
         let role: Role;
         if (roleName.match(/^\d+$/)) {
-            role = this._client.guilds.cache.get(config.iboisGuildID).roles.cache.get(roleName);
+            role = this._client.guilds.cache.get(config.juicyyGuildID).roles.cache.get(roleName);
             if (!role) {
                 msg.channel.send(':x: It seems like youv\'ve entered a role id, but the role cannot be found.');
                 return;
             }
         } else {
-            role = await this._client.guilds.cache.get(config.iboisGuildID).roles.create({
+            role = await this._client.guilds.cache.get(config.juicyyGuildID).roles.create({
                 data: {
                     name: roleName
                 }
