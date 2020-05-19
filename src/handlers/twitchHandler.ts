@@ -112,7 +112,9 @@ export class TwitchHandler {
             method: 'POST',
             body: '',
             headers: {
-                'authorization': `Bearer ${this._twitchToken}`
+                'content-type': 'application/json',
+                'authorization': `Bearer ${this._twitchToken}`,
+                'client-id': config.twitchClientID
             }
         };
 
