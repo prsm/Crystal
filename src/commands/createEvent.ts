@@ -46,14 +46,46 @@ export default class createEventCommand implements BotCommand {
 
         const content = msg.content.split(' ');
         content.shift();
-        content[0] = ' ' + content[0];
-        const parameters = content.join(' ').split(' -').map((parameter) => {
-            const key = parameter.split(' ')[0].toLowerCase();
-            let values = parameter.split(' ')
-            values.shift();
-            const value = values.join(' ');
-            return [key, value];
-        });
+        let contentString = content.join(' ');
+
+        // resolve event parameter
+        const parameters = [];
+        do {
+            contentString = contentString.trim();
+            // find key
+            const parameterStartIndex = contentString.indexOf('-');
+            const parameterEndIndex = contentString.indexOf(' ', parameterStartIndex) >= 0 ? contentString.indexOf(' ', parameterStartIndex) : contentString.length;
+            let key = contentString.substring(parameterStartIndex + 1, parameterEndIndex).toLowerCase();
+            key = key.trim();
+
+            // cut contentString with already parsed part
+            contentString = contentString.substring(parameterEndIndex);
+            contentString = contentString.trim();
+
+            // find value
+            let value;
+            let endIndex;
+            // no value was found
+            if (contentString.startsWith('-')) {
+                endIndex = 0;
+                value = '';
+                // value starts with quotation mark so the end will also be a quotation mark
+            } else if (contentString.startsWith('"')) {
+                endIndex = contentString.indexOf('"', 1);
+                value = contentString.substring(1, endIndex);
+            } else {
+                endIndex = contentString.indexOf(' -') >= 0 ? contentString.indexOf(' -') : contentString.length;
+                value = contentString.substring(0, endIndex);
+            }
+            value = value.trim();
+
+            // cut contentString with already parsed part
+            contentString = contentString.substring(endIndex);
+            contentString = contentString.trim();
+
+            // save key and value to parameter array
+            parameters.push([key, value]);
+        } while (contentString.length > 0);
 
         let event: { [key: string]: any } = {};
         for (const parameter of parameters) {

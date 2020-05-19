@@ -80,11 +80,13 @@ export class EventHandler {
         // HAS TO BE THE LAST FIELD
         embed.addField('Participants (0)', '\u200B');
 
-        embed.setFooter('✅ Participate | ⏰ Reminder | ❌ Delete Event');
+        embed.setFooter(`✅ Participate | ${event.date ? '⏰ Reminder | ' : ''}❌ Delete Event`);
         embed.setAuthor(`${author.displayName}`, author.user.avatarURL());
         const eventMessage = await this._eventChannel.send(embed);
         await eventMessage.react('✅');
-        await eventMessage.react('⏰');
+        if (event.date) {
+            await eventMessage.react('⏰');
+        }
         await eventMessage.react('❌');
         const databaseEvent: Partial<Event> = {
             channelID: channel ? channel.id : null,
@@ -116,8 +118,10 @@ export class EventHandler {
                     }
                     break;
                 case '⏰':
-                    await msgReaction.users.fetch();
-                    this._updateReminders(msgReaction.message.id, msgReaction.users.cache);
+                    if (event.date) {
+                        await msgReaction.users.fetch();
+                        this._updateReminders(msgReaction.message.id, msgReaction.users.cache);
+                    }
                     break;
                 case '❌':
                     if (event.creatorID === user.id || this._client.guilds.cache.get(config.iboisGuildID).members.cache.get(user.id).hasPermission('MANAGE_GUILD')) {
@@ -136,8 +140,10 @@ export class EventHandler {
                     }
                     break;
                 case '⏰':
-                    await msgReaction.users.fetch();
-                    this._updateReminders(msgReaction.message.id, msgReaction.users.cache);
+                    if (event.date) {
+                        await msgReaction.users.fetch();
+                        this._updateReminders(msgReaction.message.id, msgReaction.users.cache);
+                    }
                     break;
             }
         }

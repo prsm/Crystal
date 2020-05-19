@@ -18,7 +18,7 @@ export class Event {
 
     @Column('varchar', { nullable: true }) roleID: string;
 
-    @Column('boolean') withTime: boolean;
+    @Column('boolean', { nullable: true }) withTime: boolean;
 
     @OneToMany(type => ReminderMsg, reminderMsg => reminderMsg.event)
     reminderMsgs: ReminderMsg[];
