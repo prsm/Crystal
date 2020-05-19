@@ -97,7 +97,7 @@ export class TwitchHandler {
                 console.error(err);
             }
         });
-        return result ? true : false;
+        return result && result.status === 200 ? true : false;
     }
 
     private async _subscribeToWebhooks() {
@@ -137,7 +137,7 @@ export class TwitchHandler {
 
     // create a new twitch token (app tokens can't be renewed)
     private async _createTwitchToken() {
-        const response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${config.twitchClientID}&client_secret=${config.twitchClientSecret}&grant_type=client_credentials`).catch(async (err) => {
+        const response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${config.twitchClientID}&client_secret=${config.twitchClientSecret}&grant_type=client_credentials`, { method: 'POST' }).catch(async (err) => {
             console.error(err);
         });;
         if (!response) {
