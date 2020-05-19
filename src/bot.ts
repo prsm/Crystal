@@ -5,6 +5,7 @@ import { BotDatabase } from './database';
 import { ReactionRoleMsgHandler } from './handlers/reactionRoleMsgHandler';
 import { EventHandler } from './handlers/eventHandler';
 import { TwitchHandler } from './handlers/twitchHandler';
+import { ReminderHandler } from './handlers/reminderHandler';
 import { GuildMemberListener } from './listeners/guildMemberListener';
 import { MessageListener } from './listeners/messageListener';
 import { ReactionListener } from './listeners/reactionListener';
@@ -33,6 +34,7 @@ export class iBot {
     private _reactionRoleMsgHandler: ReactionRoleMsgHandler
     private _eventHandler: EventHandler;
     private _twitchHandler: TwitchHandler;
+    private _reminderHandler: ReminderHandler;
 
     // initial start method
     public async start() {
@@ -47,6 +49,7 @@ export class iBot {
         this._reactionRoleMsgHandler = new ReactionRoleMsgHandler(this);
         this._eventHandler = new EventHandler(this);
         this._twitchHandler = new TwitchHandler(this);
+        this._reminderHandler = new ReminderHandler(this);
 
         // create listnerers
         this._messageListener = new MessageListener(this);
@@ -85,6 +88,9 @@ export class iBot {
     }
     public getTwitchHandler(): TwitchHandler {
         return this._twitchHandler;
+    }
+    public getReminderHandler(): ReminderHandler {
+        return this._reminderHandler;
     }
 
     // init event listeners
@@ -133,6 +139,7 @@ export class iBot {
         this._guildMemberListener.init();
         this._reactionRoleMsgHandler.updateReactionRoleMsg();
         this._eventHandler.init();
+        this._reminderHandler.init();
         this._twitchHandler.init();
     }
 }

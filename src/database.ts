@@ -4,12 +4,14 @@ import config from './config';
 import { Config } from './entities/config';
 import { ReactionRole } from './entities/reactionRole';
 import { Event } from './entities/event';
+import { User } from './entities/user';
+import { ReminderMsg } from './entities/reminderMsg';
 
 // database options
 const options: ConnectionOptions = {
     type: 'sqlite',
     database: `./database/ibois.db`,
-    entities: [Config, ReactionRole, Event],
+    entities: [Config, ReactionRole, Event, User, ReminderMsg],
     logging: config.DBLogging
 }
 
@@ -21,6 +23,7 @@ export class BotDatabase {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
     private _eventRepository: Repository<Event>;
+    private _userRepository: Repository<User>;
 
     public async initConnection(): Promise<BotDatabase> {
         // init connection to database
@@ -33,6 +36,7 @@ export class BotDatabase {
         this._configRepository = this._connection.getRepository(Config);
         this._reactionRoleRepository = this._connection.getRepository(ReactionRole);
         this._eventRepository = this._connection.getRepository(Event);
+        this._userRepository = this._connection.getRepository(User);
 
         return this;
     }
@@ -52,5 +56,9 @@ export class BotDatabase {
 
     public getEventRepository(): Repository<Event> {
         return this._eventRepository;
+    }
+
+    public getUserRepository(): Repository<User> {
+        return this._userRepository;
     }
 }

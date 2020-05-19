@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import { User } from './user';
+import { ReminderMsg } from './reminderMsg';
 
 @Entity()
 export class Event {
@@ -15,4 +17,13 @@ export class Event {
     @Column('varchar', { nullable: true }) channelID: string;
 
     @Column('varchar', { nullable: true }) roleID: string;
+
+    @Column('boolean') withTime: boolean;
+
+    @OneToMany(type => ReminderMsg, reminderMsg => reminderMsg.event)
+    reminderMsgs: ReminderMsg[];
+
+    @ManyToMany(type => User)
+    @JoinTable()
+    remindedUsers: User[];
 }
