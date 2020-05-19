@@ -1,4 +1,4 @@
-import { Message, Client, GuildMember, TextChannel } from 'discord.js';
+import { Message, Client, GuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
 import { iBot } from '../bot';
 import config from '../config';
@@ -71,18 +71,24 @@ export class MessageListener {
             msg.channel.send('You are already a Member of ibois!').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);
             });
+            return;
         }
         if (msg.content.toLowerCase() === 'accept') {
             msg.member.roles.add(msg.guild.roles.cache.get(config.memberRoleID));
             this._sendJoinMessage(msg.member);
         } else {
-            msg.channel.send('Please write `accept`').then((botMsg) => {
+            msg.channel.send('Please accept the rules by writing `accept`').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);
             });
         }
     }
 
     private _sendJoinMessage(member: GuildMember) {
-        this._landingChannel.send(`>🟢 ${member.toString()} joined.`);
+        const embed = new MessageEmbed;
+        embed.setTitle(`:tada:joined`);
+        embed.setColor(0x28a745);
+        embed.setTimestamp(new Date());
+        embed.setAuthor(member.displayName, member.user.avatarURL());
+        this._landingChannel.send(embed);
     }
 }

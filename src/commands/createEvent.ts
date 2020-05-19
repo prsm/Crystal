@@ -15,7 +15,7 @@ export default class createEventCommand implements BotCommand {
         admin: false,
         aliases: ['ce'],
         usage: 'createevent [parameters]',
-        examples: ['createevent -t Grill and Chill im Wald -d yoooo an alli Members, es sind vill neui dezue choh und au allgemein het me sich unternand scho es zytli nümm gseh.\\nDorum würdi zumene Grill & Chill ilade! :D -date 30.05.2020 -channel grillchannel'],
+        examples: ['createevent -t Grill and Chill im Wald -d "Lad euch zumene Grillobe ih! :D\\nOrt: Im Wald" -date 04.09.2019 -channel grillchannel'],
         showInHelp: true
     }
 

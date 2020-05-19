@@ -1,4 +1,4 @@
-import { GuildMember, PartialGuildMember, TextChannel } from 'discord.js';
+import { GuildMember, PartialGuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
 import { iBot } from '../bot';
 import config from '../config';
@@ -15,7 +15,12 @@ export class GuildMemberListener {
 
     public async evalGuildMemberRemove(member: GuildMember | PartialGuildMember) {
         if (member.roles.cache.get(config.memberRoleID)) {
-            this._landingChannel.send(`>🔴 ${member.toString()} left.`);
+            const embed = new MessageEmbed;
+            embed.setTitle(`:no_entry_sign:left`);
+            embed.setColor(0xdc3545);
+            embed.setTimestamp(new Date());
+            embed.setAuthor(member.displayName, member.user.avatarURL());
+            this._landingChannel.send(embed);
         }
     }
 }

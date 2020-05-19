@@ -69,7 +69,8 @@ export class TwitchHandler {
         // More info here: https://dev.twitch.tv/docs/authentication#validating-requests
         const validToken = await this._validateToken();
         if (!validToken) {
-            this._logChannel.send(':warning: Twitch token is invalid.');
+            this._logChannel.send(':warning: Twitch token is invalid. I\'m creating a new one...');
+            this._createTwitchToken();
             return;
         }
         this._subscribeToWebhooks();
@@ -82,8 +83,6 @@ export class TwitchHandler {
     private async _validateToken() {
         // If no twitch token was found, create a new one
         if (!this._twitchToken) {
-            // TODO
-            this._createTwitchToken();
             return false;
         }
 
@@ -94,10 +93,7 @@ export class TwitchHandler {
             }
         };
         const result = await fetch('https://id.twitch.tv/oauth2/validate', options).catch(async (err) => {
-            if (err.statusCode === 401) {
-                // TODO
-                await this._renewToken();
-            } else {
+            if (err.statusCode !== 401) {
                 console.error(err);
             }
         });
@@ -125,6 +121,7 @@ export class TwitchHandler {
             options.body = JSON.stringify(body);
             await fetch(`https://api.twitch.tv/helix/webhooks/hub`, options);
         }
+        this._logChannel.send(':green_circle: Subscribed to Twitch webhooks.');
     }
 
     private _setTimer() {
@@ -138,13 +135,20 @@ export class TwitchHandler {
         this._twitchChannel.send(`<@&${config.twitchRoleID}>, ${data.user_name} went live! Join here: https://www.twitch.tv/${data.user_name}`);
     }
 
-    private async _renewToken() {
-        console.log('renew twitch token');
-    }
-
-    // create a new twitch token
-    private _createTwitchToken() {
-        console.log('create twitch token');
+    // create a new twitch token (app tokens can't be renewed)
+    private async _createTwitchToken() {
+        const response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${config.twitchClientID}&client_secret=${config.twitchClientSecret}&grant_type=client_credentials`).catch(async (err) => {
+            console.error(err);
+        });;
+        if (!response) {
+            this._logChannel.send(':warning: Something went wrong when creating a new Twitch token');
+            return;
+        }
+        const parsed = await response.json();
+        await this._configRepository.save({ key: 'twitchToken', value: parsed.access_token });
+        this._twitchToken = parsed.access_token;
+        this._logChannel.send(':green_circle: Created a new Twitch token.');
+        this._initWebhooks();
     }
 
 }
