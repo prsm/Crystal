@@ -44,5 +44,9 @@ export interface BotConfig {
     rootPath: string,
     DBLogging: boolean,
     landingChannelID: string,
-    logChannelID: string
+    logChannelID: string,
+    levelExcludedTextChannels: string[],
+    levelExcludedVoiceChannels: string[],
+    experiencePerMsg: number,
+    experiencePerVoiceMin: number
 }

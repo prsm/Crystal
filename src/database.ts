@@ -6,12 +6,15 @@ import { ReactionRole } from './entities/reactionRole';
 import { Event } from './entities/event';
 import { User } from './entities/user';
 import { ReminderMsg } from './entities/reminderMsg';
+import { MessageStat } from './entities/messageStat';
+import { VoiceStat } from './entities/voiceStat';
+import { UserLevel } from './entities/userLevel';
 
 // database options
 const options: ConnectionOptions = {
     type: 'sqlite',
     database: `./database/juicyy.db`,
-    entities: [Config, ReactionRole, Event, User, ReminderMsg],
+    entities: [Config, ReactionRole, Event, User, ReminderMsg, MessageStat, VoiceStat, UserLevel],
     logging: config.DBLogging
 }
 
@@ -25,6 +28,10 @@ export class BotDatabase {
     private _eventRepository: Repository<Event>;
     private _userRepository: Repository<User>;
 
+    private _messageStat: Repository<MessageStat>;
+    private _voiceStat: Repository<VoiceStat>;
+    private _userLevel: Repository<UserLevel>;
+
     public async initConnection(): Promise<BotDatabase> {
         // init connection to database
         this._connection = await createConnection(options);
@@ -37,6 +44,10 @@ export class BotDatabase {
         this._reactionRoleRepository = this._connection.getRepository(ReactionRole);
         this._eventRepository = this._connection.getRepository(Event);
         this._userRepository = this._connection.getRepository(User);
+
+        this._messageStat = this._connection.getRepository(MessageStat);
+        this._voiceStat = this._connection.getRepository(VoiceStat);
+        this._userLevel = this._connection.getRepository(UserLevel);
 
         return this;
     }
@@ -60,5 +71,17 @@ export class BotDatabase {
 
     public getUserRepository(): Repository<User> {
         return this._userRepository;
+    }
+
+    public getMessageStatRepository(): Repository<MessageStat> {
+        return this._messageStat;
+    }
+
+    public getVoiceStatRepository(): Repository<VoiceStat> {
+        return this._voiceStat;
+    }
+
+    public getUserLevelRepository(): Repository<UserLevel> {
+        return this._userLevel;
     }
 }

@@ -6,11 +6,14 @@ import { ReactionRoleMsgHandler } from './handlers/reactionRoleMsgHandler';
 import { EventHandler } from './handlers/eventHandler';
 import { TwitchHandler } from './handlers/twitchHandler';
 import { ReminderHandler } from './handlers/reminderHandler';
+import { StatHandler } from './handlers/statHandler';
+
 import { GuildMemberListener } from './listeners/guildMemberListener';
 import { MessageListener } from './listeners/messageListener';
 import { ReactionListener } from './listeners/reactionListener';
 import { ReadyListener } from './listeners/readyListener';
 import { VoiceChannelListener } from './listeners/voiceChannelListener';
+
 import { BotCommand } from './customInterfaces';
 import config from './config';
 
@@ -35,6 +38,7 @@ export class juicepress {
     private _eventHandler: EventHandler;
     private _twitchHandler: TwitchHandler;
     private _reminderHandler: ReminderHandler;
+    private _statHandler: StatHandler;
 
     // initial start method
     public async start() {
@@ -50,6 +54,7 @@ export class juicepress {
         this._eventHandler = new EventHandler(this);
         this._twitchHandler = new TwitchHandler(this);
         this._reminderHandler = new ReminderHandler(this);
+        this._statHandler = new StatHandler(this);
 
         // create listnerers
         this._messageListener = new MessageListener(this);
@@ -85,9 +90,6 @@ export class juicepress {
     }
     public getEventHandler(): EventHandler {
         return this._eventHandler;
-    }
-    public getTwitchHandler(): TwitchHandler {
-        return this._twitchHandler;
     }
     public getReminderHandler(): ReminderHandler {
         return this._reminderHandler;
