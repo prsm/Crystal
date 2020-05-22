@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
 import config from '../config';
 
-export default class createRoleCommand implements BotCommand {
+export default class lockCommand implements BotCommand {
     public information: BotCommand['information'] = {
         id: 5,
         name: 'lock',
@@ -18,9 +18,9 @@ export default class createRoleCommand implements BotCommand {
         showInHelp: true
     }
 
-    constructor(private _botClient: juicepress) { }
+    constructor(private _bot: Bot) { }
 
-    public async execute(msg: Message, args: string[], prefix: string) {
+    public async execute(msg: Message, args: string[]) {
         // check if user is in a vocie channel
         if (!msg.member.voice.channelID) {
             msg.channel.send(':x: You aren\'t in a voice channel.');

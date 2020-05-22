@@ -1,16 +1,16 @@
 import { GuildMember, PartialGuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import config from '../config';
 
 export class GuildMemberListener {
 
     private _landingChannel: TextChannel;
 
-    constructor(private _botClient: juicepress) { }
+    constructor(private _bot: Bot) { }
 
     public init() {
-        this._landingChannel = this._botClient.getClient().channels.cache.get(config.landingChannelID) as TextChannel;
+        this._landingChannel = this._bot.getClient().channels.cache.get(config.landingChannelID) as TextChannel;
     }
 
     public async evalGuildMemberRemove(member: GuildMember | PartialGuildMember) {

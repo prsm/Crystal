@@ -1,4 +1,4 @@
-import { juicepress } from './bot';
+import { Bot } from './bot';
 
 // init bot
-new juicepress().start();
+new Bot().start();

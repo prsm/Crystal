@@ -1,7 +1,8 @@
 import { Message, Collection, MessageEmbed, Client } from 'discord.js';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
+import config from '../config';
 
 export default class helpCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -21,12 +22,12 @@ export default class helpCommand implements BotCommand {
 
     private _commands: Collection<string, BotCommand>;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._commands = this._botClient.getAllCommands();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._commands = this._bot.getAllCommands();
     }
 
-    public async execute(msg: Message, args: string[], prefix: string) {
+    public async execute(msg: Message, args: string[]) {
         // set up embed
         let embed = new MessageEmbed();
         embed.setColor(0xFF696A);
@@ -51,14 +52,14 @@ export default class helpCommand implements BotCommand {
                 }
                 embed.addField(`Aliases`, `${aliases}`);
             }
-            embed.addField(`Usage`, `\`${prefix}${command.information.usage}\``);
+            embed.addField(`Usage`, `\`${config.prefix}${command.information.usage}\``);
             if (command.information.examples) {
                 let examples: string;
                 for (let example of command.information.examples) {
                     if (examples) {
-                        examples += `\n\`${prefix}${example}\``;
+                        examples += `\n\`${config.prefix}${example}\``;
                     } else {
-                        examples = `\`${prefix}${example}\``;
+                        examples = `\`${config.prefix}${example}\``;
                     }
                 }
                 embed.addField(`Example`, `${examples}`);
@@ -72,16 +73,16 @@ export default class helpCommand implements BotCommand {
         } else {
             // set up general help message
             embed.setTitle(`Commands`);
-            embed.setDescription(`To get detailed information about a command, type \`${prefix}help {command}\``);
+            embed.setDescription(`To get detailed information about a command, type \`${config.prefix}help {command}\``);
             let fields: {
                 [key: string]: string
             } = {};
             for (const command of this._commands) {
                 if (command[1].information.showInHelp) {
                     if (fields[`${command[1].information.category}`]) {
-                        fields[`${command[1].information.category}`] += `\n**${prefix}${command[1].information.name}**\n${command[1].information.description}`;
+                        fields[`${command[1].information.category}`] += `\n**${config.prefix}${command[1].information.name}**\n${command[1].information.description}`;
                     } else {
-                        fields[`${command[1].information.category}`] = `**${prefix}${command[1].information.name}**\n${command[1].information.description}`;
+                        fields[`${command[1].information.category}`] = `**${config.prefix}${command[1].information.name}**\n${command[1].information.description}`;
                     }
                 }
             }

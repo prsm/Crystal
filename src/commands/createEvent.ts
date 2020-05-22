@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
 // @ts-ignore
-import * as chrono from 'chrono-node';
+import chrono from 'chrono-node';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
 
 export default class createEventCommand implements BotCommand {
@@ -10,7 +10,7 @@ export default class createEventCommand implements BotCommand {
         id: 4,
         name: 'createEvent',
         category: 'Events',
-        description: 'Create an event(`!help createevent` for examples)\nParameters:\n`-t`[required] - Title\n`-d`[optional] - Description\n`-date`[optional] - Date of the event\n`-channel`[optional] - To create an associated channel (optionally you can provide a name)\n`-color`[optional] - Color of embed(string like `green` or hex code)',
+        description: 'Create an event(`!help createevent` for examples)\n\nParameters:\n`-t`[required] - Title\n`-d`[optional] - Description\n`-date`[optional] - Date of the event\n`-channel`[optional] - To create an associated channel (optionally with a name)\n`-color`[optional] - Color of embed(string like `green` or hex code)',
         argsRequired: true,
         admin: false,
         aliases: ['ce'],
@@ -39,10 +39,10 @@ export default class createEventCommand implements BotCommand {
         'yellow': '#FFFF00'
     };
 
-    constructor(private _botClient: juicepress) { }
+    constructor(private _bot: Bot) { }
 
-    public async execute(msg: Message, args: string[], prefix: string) {
-        const events = await this._botClient.getDatabase().getEventRepository().find();
+    public async execute(msg: Message, args: string[]) {
+        const events = await this._bot.getDatabase().getEventRepository().find();
 
         const content = msg.content.split(' ');
         content.shift();
@@ -137,7 +137,7 @@ export default class createEventCommand implements BotCommand {
             msg.channel.send(`:x: Parameter \`t\`/\`title\` is required.`);
             return;
         }
-        this._botClient.getEventHandler().createEvent(event, msg.member);
+        this._bot.getEventHandler().createEvent(event, msg.member);
     }
 
     private _resolveDate(dateString: string): { date: Date, info: any } {

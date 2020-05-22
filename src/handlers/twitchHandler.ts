@@ -3,7 +3,7 @@ import express from 'express';
 import fetch from 'node-fetch';
 import { Repository } from 'typeorm';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { Config } from '../entities/config';
 import config from '../config';
 
@@ -21,9 +21,9 @@ export class TwitchHandler {
 
     private _logChannel: TextChannel;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._configRepository = this._botClient.getDatabase().getConfigRepository();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._configRepository = this._bot.getDatabase().getConfigRepository();
 
         this._app = express();
         this._app.use(express.json());
@@ -35,7 +35,7 @@ export class TwitchHandler {
         if (twitchTokenConfig) this._twitchToken = twitchTokenConfig.value;
 
         this._twitchChannel = this._client.channels.cache.get(config.twitchStreamChannelID) as TextChannel;
-        this._logChannel = this._botClient.getClient().channels.cache.get(config.logChannelID) as TextChannel;
+        this._logChannel = this._bot.getClient().channels.cache.get(config.logChannelID) as TextChannel;
 
         // set up express listeners for webhooks
         this._listenToWebhooks();

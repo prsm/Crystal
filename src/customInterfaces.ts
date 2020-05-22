@@ -16,15 +16,14 @@ export interface BotCommand {
         examples: string[],
         showInHelp: boolean
     },
-    afterInit?(): void,
-    execute(msg: Message, args: string[], prefix: string): void
+    execute(msg: Message, args: string[]): void
 }
 
 /**
  * General Config
  */
 export interface BotConfig {
-    juicyyGuildID: string,
+    guildID: string,
     memberRoleID: string,
     welcomeChannelID: string,
     dynamicVoiceCategoryID: string,

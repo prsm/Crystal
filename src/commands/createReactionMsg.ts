@@ -1,7 +1,7 @@
 import { Message, MessageEmbed, Client } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { Config } from '../entities/config';
 import { ReactionRole } from '../entities/reactionRole';
 import config from '../config';
@@ -27,13 +27,13 @@ export default class createReactionMsgCommand implements BotCommand {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._configRepository = this._botClient.getDatabase().getConfigRepository();
-        this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._configRepository = this._bot.getDatabase().getConfigRepository();
+        this._reactionRoleRepository = this._bot.getDatabase().getReactionRoleRepository();
     }
 
-    public async execute(msg: Message, args: string[], prefix: string) {
+    public async execute(msg: Message, args: string[]) {
         const embed = new MessageEmbed;
         embed.setTitle('Server Roles');
         embed.setDescription('Assign yourself a role by reacting to the message.');
@@ -46,7 +46,7 @@ export default class createReactionMsgCommand implements BotCommand {
         }
         let fieldString = '';
         for (const role of roles) {
-            fieldString += `${this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
+            fieldString += `${this._client.guilds.cache.get(config.guildID).emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
         }
         embed.addField('Roles', fieldString);
         const reactionMsg = await msg.channel.send(embed);
@@ -54,12 +54,12 @@ export default class createReactionMsgCommand implements BotCommand {
         this._react(reactionMsg, roles);
         await this._configRepository.save({ key: 'reactionRoleMsg', value: reactionMsg.id });
         await this._configRepository.save({ key: 'reactionRoleChannel', value: reactionMsg.channel.id });
-        this._botClient.getReactionRoleMsgHandler().fetchReactionRoleMessage();
+        this._bot.getReactionRoleMsgHandler().fetchReactionRoleMessage();
     }
 
     private async _react(msg: Message, roles: ReactionRole[]) {
         for (const role of roles) {
-            await msg.react(this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(role.emojiID));
+            await msg.react(this._client.guilds.cache.get(config.guildID).emojis.cache.get(role.emojiID));
         }
     }
 }

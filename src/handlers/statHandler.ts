@@ -1,7 +1,7 @@
 import { Client, VoiceChannel } from 'discord.js';
 import ns from 'node-schedule';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { Repository } from 'typeorm';
 import { MessageStat } from '../entities/messageStat';
 import { VoiceStat } from '../entities/voiceStat';
@@ -16,11 +16,11 @@ export class StatHandler {
     private _voiceStatRepository: Repository<VoiceStat>;
     private _userLevelRepository: Repository<UserLevel>;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._messageStatRepository = this._botClient.getDatabase().getMessageStatRepository();
-        this._voiceStatRepository = this._botClient.getDatabase().getVoiceStatRepository();
-        this._userLevelRepository = this._botClient.getDatabase().getUserLevelRepository();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._messageStatRepository = this._bot.getDatabase().getMessageStatRepository();
+        this._voiceStatRepository = this._bot.getDatabase().getVoiceStatRepository();
+        this._userLevelRepository = this._bot.getDatabase().getUserLevelRepository();
         this._initTextChannelStats();
         this._initVoiceChannelStats();
     }
@@ -40,7 +40,7 @@ export class StatHandler {
     private _initVoiceChannelStats() {
         // check voice connections every minute (to provide detailed voice stats)
         ns.scheduleJob('0 * * * * *', () => {
-            const voiceChannels = this._client.channels.cache.array().filter((c: any) => c.guild && c.guild.id === config.juicyyGuildID && c.type === 'voice');
+            const voiceChannels = this._client.channels.cache.array().filter((c: any) => c.guild && c.guild.id === config.guildID && c.type === 'voice');
             for (const c of voiceChannels) {
                 const voiceChannel = c as VoiceChannel;
                 voiceChannel.members.each(m => {

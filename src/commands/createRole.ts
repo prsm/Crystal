@@ -1,7 +1,7 @@
 import { Message, Client, Role } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { ReactionRole } from '../entities/reactionRole';
 import config from '../config';
 import { BotCommand } from '../customInterfaces';
@@ -24,19 +24,19 @@ export default class createRoleCommand implements BotCommand {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._reactionRoleRepository = this._bot.getDatabase().getReactionRoleRepository();
     }
 
-    public async execute(msg: Message, args: string[], prefix: string) {
+    public async execute(msg: Message, args: string[]) {
         const roleName = args[0];
         if (!args[1].match(/<:\S*:(\d*)>/)) {
             msg.channel.send(':x: Second argument is not recognised as an emoji.')
             return;
         }
         const emojiID = args[1].match(/<:\S*:(\d*)>/)[1];
-        const emoji = this._client.guilds.cache.get(config.juicyyGuildID).emojis.cache.get(emojiID);
+        const emoji = this._client.guilds.cache.get(config.guildID).emojis.cache.get(emojiID);
         if (!emoji) {
             msg.channel.send(':x: Emoji not found on  server.')
             return;
@@ -48,20 +48,20 @@ export default class createRoleCommand implements BotCommand {
         }
         let role: Role;
         if (roleName.match(/^\d+$/)) {
-            role = this._client.guilds.cache.get(config.juicyyGuildID).roles.cache.get(roleName);
+            role = this._client.guilds.cache.get(config.guildID).roles.cache.get(roleName);
             if (!role) {
                 msg.channel.send(':x: It seems like youv\'ve entered a role id, but the role cannot be found.');
                 return;
             }
         } else {
-            role = await this._client.guilds.cache.get(config.juicyyGuildID).roles.create({
+            role = await this._client.guilds.cache.get(config.guildID).roles.create({
                 data: {
                     name: roleName
                 }
             });
         }
         await this._reactionRoleRepository.save({ roleID: role.id, emojiID: emojiID, name: role.name });
-        this._botClient.getReactionRoleMsgHandler().updateReactionRoleMsg();
+        this._bot.getReactionRoleMsgHandler().updateReactionRoleMsg();
         msg.channel.send(`Added Role \`${role.name}\` with emoji ${emoji.toString()}`);
     }
 }

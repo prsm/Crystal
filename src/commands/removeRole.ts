@@ -1,11 +1,11 @@
 import { Message } from 'discord.js';
 import { Repository } from 'typeorm';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { ReactionRole } from '../entities/reactionRole';
 import { BotCommand } from '../customInterfaces';
 
-export default class createRoleCommand implements BotCommand {
+export default class removeRoleCommand implements BotCommand {
     public information: BotCommand['information'] = {
         id: 3,
         name: 'removerole',
@@ -21,11 +21,11 @@ export default class createRoleCommand implements BotCommand {
 
     private _reactionRoleRepository: Repository<ReactionRole>;
 
-    constructor(private _botClient: juicepress) {
-        this._reactionRoleRepository = this._botClient.getDatabase().getReactionRoleRepository();
+    constructor(private _bot: Bot) {
+        this._reactionRoleRepository = this._bot.getDatabase().getReactionRoleRepository();
     }
 
-    public async execute(msg: Message, args: string[], prefix: string) {
+    public async execute(msg: Message, args: string[]) {
         const roleID = args[0];
         if (!roleID.match(/^\d+$/)) {
             msg.channel.send(':x: Argument is not recognised as a role id')
@@ -37,7 +37,7 @@ export default class createRoleCommand implements BotCommand {
             return;
         }
         this._reactionRoleRepository.remove(reactionRole);
-        this._botClient.getReactionRoleMsgHandler().updateReactionRoleMsg();
+        this._bot.getReactionRoleMsgHandler().updateReactionRoleMsg();
         msg.channel.send(`Removed Role \`${reactionRole.name}\``);
     }
 }

@@ -13,7 +13,7 @@ import { UserLevel } from './entities/userLevel';
 // database options
 const options: ConnectionOptions = {
     type: 'sqlite',
-    database: `./database/juicyy.db`,
+    database: `./database/bot.db`,
     entities: [Config, ReactionRole, Event, User, ReminderMsg, MessageStat, VoiceStat, UserLevel],
     logging: config.DBLogging
 }

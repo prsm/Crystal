@@ -1,6 +1,6 @@
 import { VoiceState, VoiceChannel, GuildChannelManager, CategoryChannel } from 'discord.js';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import config from '../config';
 
 export class VoiceChannelListener {
@@ -14,7 +14,7 @@ export class VoiceChannelListener {
     // all relevant voice channels with name and connected user count
     private _voiceChannels: { id: string, name: string, connectedUserCount: number }[] = [];
 
-    constructor(private _botClient: juicepress) { }
+    constructor(private _bot: Bot) { }
 
     public async evalVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
         // if user changed the voice channel (join, leave, channel switch)
@@ -42,13 +42,13 @@ export class VoiceChannelListener {
     // init parameters
     public async loadVoiceChannels() {
         // channel manager for creating new channels
-        this._channelManager = new GuildChannelManager(this._botClient.getClient().guilds.cache.get(config.juicyyGuildID));
+        this._channelManager = new GuildChannelManager(this._bot.getClient().guilds.cache.get(config.guildID));
 
         // dynamic voice category
-        this._dynamicCategory = this._botClient.getClient().channels.cache.get(config.dynamicVoiceCategoryID) as CategoryChannel;
+        this._dynamicCategory = this._bot.getClient().channels.cache.get(config.dynamicVoiceCategoryID) as CategoryChannel;
 
         // get all relevant voice channels
-        const voicechannels = this._botClient.getClient().channels.cache.filter((c) => {
+        const voicechannels = this._bot.getClient().channels.cache.filter((c) => {
             if (c.type !== 'voice') return false;
             const voiceChannel = c as VoiceChannel;
             if (voiceChannel.parentID && voiceChannel.parentID === config.dynamicVoiceCategoryID) return true;
@@ -108,7 +108,7 @@ export class VoiceChannelListener {
             // delete all other
             for (const vc of emptyChannels) {
                 // get voice channel and delete it
-                const toBeDeleted = this._botClient.getClient().channels.cache.get(vc.id);
+                const toBeDeleted = this._bot.getClient().channels.cache.get(vc.id);
                 toBeDeleted.delete();
 
                 // update channel array

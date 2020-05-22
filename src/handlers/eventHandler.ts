@@ -2,7 +2,7 @@ import { Client, MessageEmbed, CategoryChannel, TextChannel, GuildChannelManager
 import { Repository } from 'typeorm';
 import moment from 'moment';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import { Event } from '../entities/event';
 import { User as UserEntity } from '../entities/user';
 import config from '../config';
@@ -27,15 +27,15 @@ export class EventHandler {
     private _channelManager: GuildChannelManager;
 
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._eventRepository = this._botClient.getDatabase().getEventRepository();
-        this._userRepository = this._botClient.getDatabase().getUserRepository();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._eventRepository = this._bot.getDatabase().getEventRepository();
+        this._userRepository = this._bot.getDatabase().getUserRepository();
     }
 
     public async init() {
         // channel manager for creating new channels
-        this._channelManager = new GuildChannelManager(this._client.guilds.cache.get(config.juicyyGuildID));
+        this._channelManager = new GuildChannelManager(this._client.guilds.cache.get(config.guildID));
 
         // event category
         this._eventCategory = this._client.channels.cache.get(config.eventCategoryID) as CategoryChannel;
@@ -44,7 +44,7 @@ export class EventHandler {
         this._eventChannel = this._client.channels.cache.get(config.eventChannelID) as TextChannel;
         await this._eventChannel.messages.fetch();
 
-        this._reminderHandler = this._botClient.getReminderHandler();
+        this._reminderHandler = this._bot.getReminderHandler();
     }
 
     public async createEvent(event: { [key: string]: any }, author: GuildMember) {
@@ -55,7 +55,7 @@ export class EventHandler {
             infos += `**Date**: ${event.withTime ? moment(event.date).format('DD.MM.YYYY HH:mm') : moment(event.date).format('DD.MM.YYYY')}\n`;
         }
         if (event.channel && event.channel.create) {
-            role = await this._client.guilds.cache.get(config.juicyyGuildID).roles.create({ data: { name: event.channel.name ? event.channel.name : event.title } });
+            role = await this._client.guilds.cache.get(config.guildID).roles.create({ data: { name: event.channel.name ? event.channel.name : event.title } });
             channel = await this._channelManager.create(event.channel.name ? event.channel.name : event.title, {
                 parent: this._eventCategory,
                 permissionOverwrites: [
@@ -124,7 +124,7 @@ export class EventHandler {
                     }
                     break;
                 case '❌':
-                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.juicyyGuildID).members.cache.get(user.id).hasPermission('MANAGE_GUILD')) {
+                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('MANAGE_GUILD')) {
                         this._deleteEvent(event);
                     }
                     break;
@@ -184,12 +184,12 @@ export class EventHandler {
         this._eventChannel.messages.cache.get(event.eventMessageID).delete();
         if (event.channelID) {
             this._client.channels.cache.get(event.channelID).delete();
-            this._client.guilds.cache.get(config.juicyyGuildID).roles.cache.get(event.roleID).delete();
+            this._client.guilds.cache.get(config.guildID).roles.cache.get(event.roleID).delete();
         }
         for (const reminderMsg of event.reminderMsgs) {
             this._eventChannel.messages.cache.get(reminderMsg.messageId).delete();
         }
-        await this._botClient.getDatabase().getConnection().getRepository(ReminderMsg).delete({ event });
+        await this._bot.getDatabase().getConnection().getRepository(ReminderMsg).delete({ event });
         await this._eventRepository.remove(event);
         this._reminderHandler.loadReminders();
     }

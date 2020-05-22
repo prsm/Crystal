@@ -1,6 +1,6 @@
 import { Message, Client, GuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import config from '../config';
 
 export class MessageListener {
@@ -11,14 +11,14 @@ export class MessageListener {
 
     private _landingChannel: TextChannel;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
 
         this._prefix = config.prefix;
     }
 
     public init() {
-        this._landingChannel = this._botClient.getClient().channels.cache.get(config.landingChannelID) as TextChannel;
+        this._landingChannel = this._bot.getClient().channels.cache.get(config.landingChannelID) as TextChannel;
     }
 
     public async evalMessage(msg: Message) {
@@ -33,7 +33,7 @@ export class MessageListener {
         let args = msg.content.slice(this._prefix.length).split(/ +/);
         const commandName = args.shift().toLowerCase();
 
-        const command = this._botClient.getAllCommands().get(commandName) || this._botClient.getAllCommands().find(cmd => cmd.information.aliases && cmd.information.aliases.includes(commandName));
+        const command = this._bot.getAllCommands().get(commandName) || this._bot.getAllCommands().find(cmd => cmd.information.aliases && cmd.information.aliases.includes(commandName));
 
         // return if no command was found.
         if (!command) return;
@@ -58,7 +58,7 @@ export class MessageListener {
         }
 
         try {
-            command.execute(msg, args, this._prefix);
+            command.execute(msg, args);
         } catch (error) {
             console.error(error);
             msg.channel.send(`Error...`);
@@ -68,7 +68,7 @@ export class MessageListener {
     public async welcomeMessage(msg: Message) {
         msg.delete();
         if (msg.member.roles.cache.get(config.memberRoleID)) {
-            msg.channel.send('You are already a Member of juicyy!').then((botMsg) => {
+            msg.channel.send('You are already a Member of this server!').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);
             });
             return;

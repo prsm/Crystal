@@ -2,7 +2,7 @@ import { Client, TextChannel, Message } from 'discord.js';
 import moment from 'moment';
 import ns from 'node-schedule';
 
-import { juicepress } from '../bot';
+import { Bot } from '../bot';
 import config from '../config';
 import { Repository } from 'typeorm';
 import { Event } from '../entities/event';
@@ -17,9 +17,9 @@ export class ReminderHandler {
 
     private _eventChannel: TextChannel;
 
-    constructor(private _botClient: juicepress) {
-        this._client = this._botClient.getClient();
-        this._eventRepository = this._botClient.getDatabase().getEventRepository();
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+        this._eventRepository = this._bot.getDatabase().getEventRepository();
     }
 
     init() {
@@ -66,7 +66,7 @@ export class ReminderHandler {
             reminderMessage = await channel.send(`Event **${event.title}** is starting tomorrow!\n\n${pingString}`);
         }
         if (!event.channelID) {
-            this._botClient.getDatabase().getConnection().manager.insert('ReminderMsg', { messageId: reminderMessage.id, event });
+            this._bot.getDatabase().getConnection().manager.insert('ReminderMsg', { messageId: reminderMessage.id, event });
         }
     }
 
