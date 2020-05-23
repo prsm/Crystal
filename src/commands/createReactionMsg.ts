@@ -38,7 +38,7 @@ export default class createReactionMsgCommand implements BotCommand {
         embed.setTitle('Server Roles');
         embed.setDescription('Assign yourself a role by reacting to the message.');
         embed.setThumbnail(`https://cdn.discordapp.com/attachments/515257029120622622/678676123466596388/ibois.png`);
-        embed.setColor(0xFF696A);
+        embed.setColor(config.embedColor);
         const roles = await this._reactionRoleRepository.find();
         if (roles.length === 0) {
             msg.channel.send(`:x: No Roles available. Add a reaction role with \`${config.prefix}createrole\``)

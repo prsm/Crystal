@@ -7,6 +7,7 @@ import { MessageStat } from '../entities/messageStat';
 import { VoiceStat } from '../entities/voiceStat';
 import config from '../config';
 import { UserLevel } from '../entities/userLevel';
+import { MemberCountStat } from '../entities/memberCountStat';
 
 export class StatHandler {
 
@@ -14,15 +15,18 @@ export class StatHandler {
 
     private _messageStatRepository: Repository<MessageStat>;
     private _voiceStatRepository: Repository<VoiceStat>;
+    private _memberCountStatRepository: Repository<MemberCountStat>;
     private _userLevelRepository: Repository<UserLevel>;
 
     constructor(private _bot: Bot) {
         this._client = this._bot.getClient();
         this._messageStatRepository = this._bot.getDatabase().getMessageStatRepository();
         this._voiceStatRepository = this._bot.getDatabase().getVoiceStatRepository();
+        this._memberCountStatRepository = this._bot.getDatabase().getMemberCountStatRepository();
         this._userLevelRepository = this._bot.getDatabase().getUserLevelRepository();
         this._initTextChannelStats();
         this._initVoiceChannelStats();
+        this._initMemberCountStats();
     }
 
     private _initTextChannelStats() {
@@ -52,6 +56,13 @@ export class StatHandler {
                     }
                 });
             }
+        });
+    }
+
+    private _initMemberCountStats() {
+        // check membercount every hour
+        ns.scheduleJob('0 * * * *', () => {
+            this._memberCountStatRepository.insert({ memberCount: this._client.guilds.cache.get(config.guildID).memberCount, timestamp: new Date() });
         });
     }
 

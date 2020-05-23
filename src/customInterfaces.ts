@@ -47,5 +47,6 @@ export interface BotConfig {
     levelExcludedTextChannels: string[],
     levelExcludedVoiceChannels: string[],
     experiencePerMsg: number,
-    experiencePerVoiceMin: number
+    experiencePerVoiceMin: number,
+    embedColor: number
 }

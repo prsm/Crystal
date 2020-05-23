@@ -30,7 +30,7 @@ export default class helpCommand implements BotCommand {
     public async execute(msg: Message, args: string[]) {
         // set up embed
         let embed = new MessageEmbed();
-        embed.setColor(0xFF696A);
+        embed.setColor(config.embedColor);
         embed.setAuthor(`${this._client.user.username}`, this._client.user.avatarURL());
 
         // search for a command to display help for
