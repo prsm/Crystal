@@ -142,6 +142,7 @@ export class Bot {
         this._reactionRoleMsgHandler.updateReactionRoleMsg();
         this._eventHandler.init();
         this._reminderHandler.init();
+        this._statHandler.init();
         this._twitchHandler.init();
     }
 }

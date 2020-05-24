@@ -24,6 +24,9 @@ export class StatHandler {
         this._voiceStatRepository = this._bot.getDatabase().getVoiceStatRepository();
         this._memberCountStatRepository = this._bot.getDatabase().getMemberCountStatRepository();
         this._userLevelRepository = this._bot.getDatabase().getUserLevelRepository();
+    }
+
+    public init() {
         this._initTextChannelStats();
         this._initVoiceChannelStats();
         this._initMemberCountStats();

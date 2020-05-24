@@ -3,12 +3,13 @@ import fs from 'fs';
 
 import config from '../config';
 
-export class Charter {
+export class ChartHandler {
     private _window: jsdom.DOMWindow;
 
     constructor() { }
 
     public async draw(width: number, height: number, configuration: any) {
+        this._setOptions(configuration);
         const dom = new jsdom.JSDOM(`
         <html>
             <body>
@@ -42,11 +43,17 @@ export class Charter {
         `);
 
         // save chart to file
-        await this.writeImageToFile('./database/chart.png');
+        await this._writeImageToFile('./database/chart.png');
+    }
+
+    // set options which are required
+    private _setOptions(configuration: any) {
+        configuration.options.animation = { duration: 0 };
+        configuration.options.responsive = false;
     }
 
     // get base64 string and save it to a png image
-    public async writeImageToFile(filePath: string) {
+    private async _writeImageToFile(filePath: string) {
         fs.writeFileSync(filePath, this._window.document.getElementById('base64Image').innerHTML.replace(/^data:image\/png;base64,/, ''), { encoding: 'base64' });
     }
 
