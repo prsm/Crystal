@@ -8,7 +8,7 @@ export default class lockCommand implements BotCommand {
     public information: BotCommand['information'] = {
         id: 5,
         name: 'lock',
-        category: 'Dynamic Channels',
+        category: 'Tools',
         description: 'Lock your voice channel to a specific amount of users. No limit or 0 unlocks the channel.',
         argsRequired: false,
         admin: false,
