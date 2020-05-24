@@ -82,7 +82,7 @@ export default class statCommand implements BotCommand {
             .orderBy('count', 'DESC')
             .limit(5)
             .getRawMany();
-        embed.addField('Top message senders', topMessageSender.map((tms, i) => `${i + 1}. <@${tms.userID}>(${tms.count}x)`), true);
+        embed.addField('Top message senders', topMessageSender.length > 0 ? topMessageSender.map((tms, i) => `${i + 1}. <@${tms.userID}> | ${tms.count}x`) : 'Pretty empty...', true);
 
         const topVoiceMembers = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('count(Id)', 'count')
@@ -91,7 +91,7 @@ export default class statCommand implements BotCommand {
             .orderBy('count', 'DESC')
             .limit(5)
             .getRawMany();
-        embed.addField('Most active in voice', topVoiceMembers.map((tvm, i) => `${i + 1}. <@${tvm.userID}>(${this._formatVoiceMinutes(tvm.count)})`), true);
+        embed.addField('Most active in voice', topVoiceMembers.length > 0 ? topVoiceMembers.map((tvm, i) => `${i + 1}. <@${tvm.userID}> | ${this._formatVoiceMinutes(tvm.count)}`) : 'Pretty empty...', true);
 
         const topLevels = await this._userLevelRepository.createQueryBuilder('userLevel')
             .select('userLevel.userID', 'userID')
@@ -99,7 +99,7 @@ export default class statCommand implements BotCommand {
             .orderBy('exp', 'DESC')
             .limit(5)
             .getRawMany();
-        embed.addField('Highest levels', topLevels.map((tl, i) => `${i + 1}. <@${tl.userID}>(${tl.exp}xp)`), true);
+        embed.addField('Highest levels', topLevels.length > 0 ? topLevels.map((tl, i) => `${i + 1}. <@${tl.userID}> | ${tl.exp}xp`) : 'Pretty empty...', true);
 
         msg.channel.send(embed);
     }

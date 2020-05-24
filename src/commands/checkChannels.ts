@@ -40,6 +40,13 @@ export default class checkChannelsCommand implements BotCommand {
         embed.addField('Textchannels', textChannels.map(c => `${c.toString()}`), true);
         embed.addField('Voicechannels', voiceChannels.map(c => `${c.name}`), true);
 
+        embed.addField('\u200B', '\u200B');
+
+        embed.addField('Text channels exluded from stats',
+            config.levelExcludedTextChannels.length > 0 ? config.levelExcludedTextChannels.map(id => `<#${id}>`) : 'None', true);
+        embed.addField('Voice channels exluded from stats',
+            config.levelExcludedVoiceChannels.length > 0 ? config.levelExcludedVoiceChannels.map(id => `${guild.channels.cache.get(id).name}`) : 'None', true);
+
         msg.channel.send(embed);
     }
 

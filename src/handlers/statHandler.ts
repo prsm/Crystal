@@ -35,10 +35,10 @@ export class StatHandler {
     private _initTextChannelStats() {
         this._client.on('message', (msg) => {
             if (msg.author.bot) return;
-            this._messageStatRepository.insert({ channelID: msg.channel.id, userID: msg.author.id, timestamp: new Date() });
 
             // if voice channel is not excluded
             if (!config.levelExcludedTextChannels.includes(msg.channel.id)) {
+                this._messageStatRepository.insert({ channelID: msg.channel.id, userID: msg.author.id, timestamp: new Date() });
                 this._addExperience(msg.author.id, config.experiencePerMsg);
             }
         });
@@ -52,9 +52,10 @@ export class StatHandler {
                 const voiceChannel = c as VoiceChannel;
                 voiceChannel.members.each(m => {
                     if (m.user.bot) return;
-                    this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
+
                     // if voice channel is not excluded
                     if (!config.levelExcludedVoiceChannels.includes(c.id)) {
+                        this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
                         this._addExperience(m.id, config.experiencePerVoiceMin);
                     }
                 });
