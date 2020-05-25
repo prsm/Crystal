@@ -39,13 +39,13 @@ export class ReactionRoleMsgHandler {
         for (const role of roles) {
             if (!this._reactionRoleMsg.reactions.cache.find(r => r.emoji.id == role.emojiID)) {
                 embed.fields = [];
-                await this._reactionRoleMsg.react(this._client.guilds.cache.get(config.guildID).emojis.cache.get(role.emojiID));
+                await this._reactionRoleMsg.react(this._client.emojis.cache.get(role.emojiID));
             }
         }
         const reactions = this._reactionRoleMsg.reactions.cache;
         for (const reaction of reactions) {
             if (roles.find(r => r.emojiID === reaction[0])) {
-                rolesMsg += `\n${this._client.guilds.cache.get(config.guildID).emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}**`;
+                rolesMsg += `\n${this._client.emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}**`;
             } else {
                 console.log(`WARNING: Not role for emoji ${reaction[0]} found...`);
                 //this._reactionRoleMsg.reactions.cache.get(reaction[0]).remove();

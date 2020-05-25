@@ -46,7 +46,7 @@ export default class createReactionMsgCommand implements BotCommand {
         }
         let fieldString = '';
         for (const role of roles) {
-            fieldString += `${this._client.guilds.cache.get(config.guildID).emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
+            fieldString += `${this._client.emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
         }
         embed.addField('Roles', fieldString);
         const reactionMsg = await msg.channel.send(embed);
@@ -59,7 +59,7 @@ export default class createReactionMsgCommand implements BotCommand {
 
     private async _react(msg: Message, roles: ReactionRole[]) {
         for (const role of roles) {
-            await msg.react(this._client.guilds.cache.get(config.guildID).emojis.cache.get(role.emojiID));
+            await msg.react(this._client.emojis.cache.get(role.emojiID));
         }
     }
 }

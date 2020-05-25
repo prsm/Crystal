@@ -36,9 +36,9 @@ export default class createRoleCommand implements BotCommand {
             return;
         }
         const emojiID = args[1].match(/<:\S*:(\d*)>/)[1];
-        const emoji = this._client.guilds.cache.get(config.guildID).emojis.cache.get(emojiID);
+        const emoji = this._client.emojis.cache.get(emojiID);
         if (!emoji) {
-            msg.channel.send(':x: Emoji not found on  server.')
+            msg.channel.send(':x: Emoji not found.')
             return;
         }
         const reactionRoles = await this._reactionRoleRepository.find();
