@@ -50,15 +50,19 @@ export class StatHandler {
             const voiceChannels = this._client.channels.cache.array().filter((c: any) => c.guild && c.guild.id === config.guildID && c.type === 'voice');
             for (const c of voiceChannels) {
                 const voiceChannel = c as VoiceChannel;
-                voiceChannel.members.each(m => {
-                    if (m.user.bot) return;
 
-                    // if voice channel is not excluded
-                    if (!config.levelExcludedVoiceChannels.includes(c.id)) {
-                        this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
-                        this._addExperience(m.id, config.experiencePerVoiceMin);
-                    }
-                });
+                // if more than one user is connected in this channel
+                if (voiceChannel.members.filter(m => !m.user.bot).size > 1) {
+                    voiceChannel.members.each(m => {
+                        if (m.user.bot) return;
+
+                        // if voice channel is not excluded
+                        if (!config.levelExcludedVoiceChannels.includes(c.id)) {
+                            this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
+                            this._addExperience(m.id, config.experiencePerVoiceMin);
+                        }
+                    });
+                }
             }
         });
     }
