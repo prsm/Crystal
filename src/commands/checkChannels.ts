@@ -28,9 +28,9 @@ export default class checkChannelsCommand implements BotCommand {
         const guild = this._client.guilds.cache.get(config.guildID);
 
         // get all text channels and sort them in the right order
-        const textChannels = guild.channels.cache.filter(c => c.type === 'text').sort(this._sortChannels);
+        const textChannels = guild.channels.cache.filter(c => c.type === 'text' && c.viewable).sort(this._sortChannels);
         // get all voice channels and sort them in the right order
-        const voiceChannels = guild.channels.cache.filter(c => c.type === 'voice').sort(this._sortChannels);
+        const voiceChannels = guild.channels.cache.filter(c => c.type === 'voice' && c.viewable).sort(this._sortChannels);
 
         const embed = new MessageEmbed();
         embed.setColor(config.embedColor);

@@ -123,7 +123,7 @@ export class TwitchHandler {
             options.body = JSON.stringify(body);
             await fetch(`https://api.twitch.tv/helix/webhooks/hub`, options);
         }
-        this._logChannel.send(':green_circle: Subscribed to Twitch webhooks.');
+        this._logChannel.send(':purple_circle: Subscribed to Twitch webhooks.');
     }
 
     private _setTimer() {

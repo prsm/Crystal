@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, MessageReaction, User, CollectorFilter, TextChannel, Client, VoiceChannel } from 'discord.js';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
@@ -18,7 +18,11 @@ export default class shuffleCommand implements BotCommand {
         showInHelp: true
     }
 
-    constructor(private _bot: Bot) { }
+    private _client: Client;
+
+    constructor(private _bot: Bot) {
+        this._client = this._bot.getClient();
+    }
 
     public async execute(msg: Message, args: string[]) {
         let teamCount = 2;
@@ -52,7 +56,15 @@ export default class shuffleCommand implements BotCommand {
         embed.setTitle('Shuffled Teams');
         teams.forEach((team, i) => embed.addField(`Team ${i + 1}`, team.map(userId => `<@${userId}>`), true));
 
-        msg.channel.send(embed);
+        const m = await msg.channel.send(embed);
+
+        const filter = (reaction: MessageReaction, user: User) => {
+            return ['🔀'].includes(reaction.emoji.name) && msg.guild.members.cache.get(user.id).hasPermission('MANAGE_GUILD') && !user.bot;
+        };
+
+        this._awaitMenuReactions(m, filter, teams);
+
+        await m.react('🔀');
     }
 
     // randomly shuffle the array
@@ -62,4 +74,39 @@ export default class shuffleCommand implements BotCommand {
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
+
+    private async _awaitMenuReactions(m: Message, filter: CollectorFilter, teams: string[][]) {
+        m.awaitReactions(filter, { max: 1, time: 4 * 60 * 1000, errors: ['time'] })
+            .then(async (collected) => {
+                const reaction = collected.first();
+                if (!reaction) return;
+                this._moveUsers(teams, reaction.users.cache.find(u => !u.bot));
+                await m.reactions.removeAll();
+            }).catch(() => {
+                m.reactions.removeAll();
+            });
+    }
+
+    private async _moveUsers(teams: string[][], mover: User) {
+        const logChannel = this._client.channels.cache.get(config.logChannelID) as TextChannel;
+        logChannel.send(`:white_circle: ${mover.tag} (\`${mover.id}\`) moved users with the shuffle command.`);
+
+        teams.shift();
+        for (const team of teams) {
+            const emtpyVoiceChannel = this._client.channels.cache.find((c) => {
+                if (c.type !== 'voice') return false;
+                const vc = c as VoiceChannel;
+                return vc.parentID === config.dynamicVoiceCategoryID && vc.members.size === 0
+            });
+            for (const userID of team) {
+                await this._client.guilds.cache.get(config.guildID).members.cache.get(userID).voice.setChannel(emtpyVoiceChannel, `Shuffle move by ${mover.tag} (${mover.id})`);
+            }
+            await this._delay(500);
+        }
+    }
+
+    private _delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
 }
