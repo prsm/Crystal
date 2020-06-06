@@ -86,7 +86,7 @@ export class MessageListener {
     private _sendJoinMessage(member: GuildMember) {
         const embed = new MessageEmbed;
         embed.setTitle(`New Member!`);
-        embed.setDescription(`${member.displayName} joined.`)
+        embed.setDescription(`${member.toString()} joined.`)
         embed.setColor(0x28a745);
         embed.setTimestamp(new Date());
         this._landingChannel.send(embed);
