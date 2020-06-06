@@ -124,7 +124,7 @@ export class EventHandler {
                     }
                     break;
                 case '❌':
-                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('MANAGE_GUILD')) {
+                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR')) {
                         this._deleteEvent(event);
                     }
                     break;

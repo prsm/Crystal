@@ -86,7 +86,7 @@ export class VoiceChannelListener {
             const number = parseInt(this._voiceChannels[this._voiceChannels.length - 1].name.match(/^.*#(.*)$/)[1]);
 
             // create new channel under the right category
-            const createdChannel = await this._channelManager.create(`🔊┃Voice #${number + 1}`, {
+            const createdChannel = await this._channelManager.create(`voice #${number + 1}`, {
                 type: 'voice',
                 parent: this._dynamicCategory
             });
