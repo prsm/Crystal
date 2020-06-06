@@ -16,10 +16,10 @@ export class GuildMemberListener {
     public async evalGuildMemberRemove(member: GuildMember | PartialGuildMember) {
         if (member.roles.cache.get(config.memberRoleID)) {
             const embed = new MessageEmbed;
-            embed.setTitle(`:no_entry_sign:left`);
+            embed.setTitle(`Member left`);
+            embed.setDescription(`${member.displayName} left.`)
             embed.setColor(0xdc3545);
             embed.setTimestamp(new Date());
-            embed.setAuthor(member.displayName, member.user.avatarURL());
             this._landingChannel.send(embed);
         }
     }

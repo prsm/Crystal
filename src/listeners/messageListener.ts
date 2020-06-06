@@ -85,10 +85,10 @@ export class MessageListener {
 
     private _sendJoinMessage(member: GuildMember) {
         const embed = new MessageEmbed;
-        embed.setTitle(`:tada:joined`);
+        embed.setTitle(`New Member!`);
+        embed.setDescription(`${member.displayName} joined.`)
         embed.setColor(0x28a745);
         embed.setTimestamp(new Date());
-        embed.setAuthor(member.displayName, member.user.avatarURL());
         this._landingChannel.send(embed);
     }
 }
