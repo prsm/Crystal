@@ -1,4 +1,4 @@
-import { Client, TextChannel } from 'discord.js';
+import { Client, TextChannel, MessageEmbed } from 'discord.js';
 import express from 'express';
 import fetch from 'node-fetch';
 import { Repository } from 'typeorm';
@@ -134,7 +134,11 @@ export class TwitchHandler {
     }
 
     private _sendStreamNotification(data: any) {
-        this._twitchChannel.send(`<@&${config.twitchRoleID}>, ${data.user_name} went live! Join here: https://www.twitch.tv/${data.user_name}`);
+        const embed = new MessageEmbed();
+        embed.setColor(config.embedColor);
+        embed.setTitle(`${data.title}`);
+        embed.setDescription(`<@${config.twitchUsers[data.user_id]}> went live!\n\n<:twitch:706570730984439848> [Join here](https://www.twitch.tv/${data.user_name})`);
+        this._twitchChannel.send(`<@&${config.twitchRoleID}>`, embed);
     }
 
     // create a new twitch token (app tokens can't be renewed)

@@ -111,7 +111,7 @@ export default class statCommand implements BotCommand {
         embed.setTitle('Bot Stats');
         embed.setColor(config.embedColor);
 
-        embed.addField(':hash:Version', `**2.0.0** | 23.05.20`, true);
+        embed.addField(':hash:Version', `**${config.botVersion}** | ${config.botVersionDate}`, true);
         embed.addField(':stopwatch:Uptime', `${this._formatUptime(process.uptime())}`, true);
         embed.addField(`Discord.js Version`, `v${version}`, true);
         embed.addField(`Node.js Version`, `${process.version}`, true);
