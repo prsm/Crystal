@@ -1,6 +1,6 @@
 {
-  "name": "juicepress",
-  "version": "2.1.0",
+  "name": "crystal",
+  "version": "2.1.1",
   "main": "app.ts",
   "scripts": {
     "start": "node dist/app.js",

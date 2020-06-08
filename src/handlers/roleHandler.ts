@@ -57,7 +57,7 @@ export class RoleHandler {
 
     public async eventRoleUpdate() {
         const events = await this._bot.getDatabase().getEventRepository().find();
-        this.eventRoleIds = events.map(e => e.roleID);
+        this.eventRoleIds = events.map(e => e.roleID).filter(rID => rID !== null);
     }
 
 }

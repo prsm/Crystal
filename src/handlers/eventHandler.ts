@@ -117,7 +117,7 @@ export class EventHandler {
                 case '✅':
                     await msgReaction.users.fetch();
                     this._updateParticipants(msgReaction.message, msgReaction.users.cache);
-                    this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
+                    if (event.roleID) this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
                     break;
                 case '⏰':
                     if (event.date) {
@@ -136,7 +136,7 @@ export class EventHandler {
                 case '✅':
                     await msgReaction.users.fetch();
                     this._updateParticipants(msgReaction.message, msgReaction.users.cache);
-                    this._roleHandler.removeRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
+                    if (event.roleID) this._roleHandler.removeRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
                     break;
                 case '⏰':
                     if (event.date) {
