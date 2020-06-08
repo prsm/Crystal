@@ -32,6 +32,19 @@ export default class statCommand implements BotCommand {
     private _memberCountStatRepository: Repository<MemberCountStat>;
     private _userLevelRepository: Repository<UserLevel>;
 
+    private _numbers: string[] = [
+        '1⃣',
+        '2⃣',
+        '3⃣',
+        '4⃣',
+        '5⃣',
+        '6⃣',
+        '7⃣',
+        '8⃣',
+        '9⃣',
+        ':keycap_ten:'
+    ]
+
     constructor(private _bot: Bot) {
         this._client = this._bot.getClient();
         this._messageStatRepository = this._bot.getDatabase().getMessageStatRepository();
@@ -65,13 +78,13 @@ export default class statCommand implements BotCommand {
         embed.setTitle('Server Stats');
         embed.setAuthor(guild.name, guild.iconURL());
         embed.setColor(config.embedColor);
-        embed.addField(':chart_with_upwards_trend:Members', guild.memberCount, true);
+        embed.addField(':chart_with_upwards_trend:Members', `\`${guild.memberCount}\``, true);
 
         const sentMessageCount = await this._messageStatRepository.count();
-        embed.addField(':pen_ballpoint:Sent Messages', sentMessageCount, true);
+        embed.addField(':pen_ballpoint:Sent Messages', `\`${sentMessageCount}\``, true);
 
         const voiceMinuteCount = await this._voiceStatRepository.count();
-        embed.addField(':loud_sound:Total Voice Time', this._formatVoiceMinutes(voiceMinuteCount), true);
+        embed.addField(':loud_sound:Total Voice Time', `\`${this._formatVoiceMinutes(voiceMinuteCount)}\``, true);
 
         embed.addField('\u200B', '\u200B');
 
@@ -82,7 +95,7 @@ export default class statCommand implements BotCommand {
             .orderBy('count', 'DESC')
             .limit(5)
             .getRawMany();
-        embed.addField('Top message senders', topMessageSender.length > 0 ? topMessageSender.map((tms, i) => `${i + 1}. <@${tms.userID}> | ${tms.count}x`) : 'Pretty empty...', true);
+        embed.addField('Top message senders', topMessageSender.length > 0 ? topMessageSender.map((tms, i) => `${this._numbers[i]}<@${tms.userID}>\n:envelope:\`${tms.count}x\``) : 'Pretty empty...', true);
 
         const topVoiceMembers = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('count(Id)', 'count')
@@ -91,7 +104,7 @@ export default class statCommand implements BotCommand {
             .orderBy('count', 'DESC')
             .limit(5)
             .getRawMany();
-        embed.addField('Most active in voice', topVoiceMembers.length > 0 ? topVoiceMembers.map((tvm, i) => `${i + 1}. <@${tvm.userID}> | ${this._formatVoiceMinutes(tvm.count)}`) : 'Pretty empty...', true);
+        embed.addField('Most active in voice', topVoiceMembers.length > 0 ? topVoiceMembers.map((tvm, i) => `${this._numbers[i]}<@${tvm.userID}>\n:stopwatch:\`${this._formatVoiceMinutes(tvm.count)}\``) : 'Pretty empty...', true);
 
         const topLevels = await this._userLevelRepository.createQueryBuilder('userLevel')
             .select('userLevel.userID', 'userID')
@@ -99,7 +112,7 @@ export default class statCommand implements BotCommand {
             .orderBy('exp', 'DESC')
             .limit(5)
             .getRawMany();
-        embed.addField('Highest levels', topLevels.length > 0 ? topLevels.map((tl, i) => `${i + 1}. <@${tl.userID}> | ${tl.exp}xp`) : 'Pretty empty...', true);
+        embed.addField('Highest levels', topLevels.length > 0 ? topLevels.map((tl, i) => `${this._numbers[i]}<@${tl.userID}>\n:star:\`${tl.exp}xp\``) : 'Pretty empty...', true);
 
         msg.channel.send(embed);
     }
@@ -118,8 +131,8 @@ export default class statCommand implements BotCommand {
         embed.addField(`:minidisc:Memory Used`, `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} mb`, true);
 
         const databaseStats = fs.statSync('./database/bot.db');
-        const fileSize = databaseStats.size / 1000;
-        embed.addField(':card_box: Database Size', `${fileSize} kb`, true);
+        const fileSize = databaseStats.size / 1000 / 1000;
+        embed.addField(':card_box: Database Size', `${fileSize} mb`, true);
 
         msg.channel.send(embed);
     }
@@ -140,9 +153,7 @@ export default class statCommand implements BotCommand {
     private _formatVoiceMinutes(minutes: number) {
         let duration = moment.duration(minutes, 'minutes');
         return (
-            (Math.floor(duration.asMonths()) > 0 ? `${Math.floor(duration.asMonths())}M ` : '') +
-            (Math.floor(duration.asMonths()) > 0 || duration.days() > 0 ? `${duration.days()}d ` : '') +
-            (duration.hours() > 0 || duration.days() > 0 || Math.floor(duration.asMonths()) > 0 ? `${duration.hours()}h ` : '') +
+            (duration.asHours() > 0 ? `${Math.floor(duration.asHours())}h ` : '') +
             `${duration.minutes()}m`
         );
     }
