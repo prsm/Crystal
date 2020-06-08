@@ -7,6 +7,7 @@ import { EventHandler } from './handlers/eventHandler';
 import { TwitchHandler } from './handlers/twitchHandler';
 import { ReminderHandler } from './handlers/reminderHandler';
 import { StatHandler } from './handlers/statHandler';
+import { RoleHandler } from './handlers/roleHandler';
 
 import { GuildMemberListener } from './listeners/guildMemberListener';
 import { MessageListener } from './listeners/messageListener';
@@ -39,6 +40,7 @@ export class Bot {
     private _twitchHandler: TwitchHandler;
     private _reminderHandler: ReminderHandler;
     private _statHandler: StatHandler;
+    private _roleHandler: RoleHandler;
 
     // initial start method
     public async start() {
@@ -55,6 +57,7 @@ export class Bot {
         this._twitchHandler = new TwitchHandler(this);
         this._reminderHandler = new ReminderHandler(this);
         this._statHandler = new StatHandler(this);
+        this._roleHandler = new RoleHandler(this);
 
         // create listnerers
         this._messageListener = new MessageListener(this);
@@ -93,6 +96,9 @@ export class Bot {
     }
     public getReminderHandler(): ReminderHandler {
         return this._reminderHandler;
+    }
+    public getRoleHandler(): RoleHandler {
+        return this._roleHandler;
     }
 
     // init event listeners
@@ -143,6 +149,7 @@ export class Bot {
         this._eventHandler.init();
         this._reminderHandler.init();
         this._statHandler.init();
+        this._roleHandler.init();
         this._twitchHandler.init();
     }
 }

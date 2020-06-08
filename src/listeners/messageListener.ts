@@ -2,6 +2,8 @@ import { Message, Client, GuildMember, TextChannel, MessageEmbed } from 'discord
 
 import { Bot } from '../bot';
 import config from '../config';
+import { RoleHandler } from '../handlers/roleHandler';
+import { RoleType } from '../customInterfaces';
 
 export class MessageListener {
 
@@ -11,10 +13,14 @@ export class MessageListener {
 
     private _landingChannel: TextChannel;
 
+    private _roleHandler: RoleHandler;
+
     constructor(private _bot: Bot) {
         this._client = this._bot.getClient();
 
         this._prefix = config.prefix;
+
+        this._roleHandler = this._bot.getRoleHandler();
     }
 
     public init() {
@@ -74,7 +80,7 @@ export class MessageListener {
             return;
         }
         if (msg.content.toLowerCase() === 'accept') {
-            msg.member.roles.add(msg.guild.roles.cache.get(config.memberRoleID));
+            this._roleHandler.addRole(msg.member, config.memberRoleID, RoleType.MEMBERROLE);
             this._sendJoinMessage(msg.member);
         } else {
             msg.channel.send('Please accept the rules by writing `accept`').then((botMsg) => {

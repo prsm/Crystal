@@ -51,5 +51,13 @@ export interface BotConfig {
     embedColor: number,
     twitchUsers: { [key: string]: string },
     botVersion: string,
-    botVersionDate: string
+    botVersionDate: string,
+    roleSeparatorID: string,
+    eventSeparatorID: string
+}
+
+export enum RoleType {
+    REACTIONROLE,
+    EVENTROLE,
+    MEMBERROLE
 }

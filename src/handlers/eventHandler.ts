@@ -8,12 +8,16 @@ import { User as UserEntity } from '../entities/user';
 import config from '../config';
 import { ReminderHandler } from './reminderHandler';
 import { ReminderMsg } from '../entities/reminderMsg';
+import { RoleHandler } from './roleHandler';
+import { RoleType } from '../customInterfaces';
 
 export class EventHandler {
 
     private _client: Client;
 
     private _reminderHandler: ReminderHandler;
+
+    private _roleHandler: RoleHandler;
 
     private _eventCategory: CategoryChannel;
 
@@ -45,6 +49,7 @@ export class EventHandler {
         await this._eventChannel.messages.fetch();
 
         this._reminderHandler = this._bot.getReminderHandler();
+        this._roleHandler = this._bot.getRoleHandler();
     }
 
     public async createEvent(event: { [key: string]: any }, author: GuildMember) {
@@ -112,10 +117,7 @@ export class EventHandler {
                 case '✅':
                     await msgReaction.users.fetch();
                     this._updateParticipants(msgReaction.message, msgReaction.users.cache);
-                    const role = msgReaction.message.guild.roles.cache.get(event.roleID);
-                    if (role) {
-                        msgReaction.message.guild.members.cache.get(user.id).roles.add(role);
-                    }
+                    this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
                     break;
                 case '⏰':
                     if (event.date) {
@@ -134,10 +136,7 @@ export class EventHandler {
                 case '✅':
                     await msgReaction.users.fetch();
                     this._updateParticipants(msgReaction.message, msgReaction.users.cache);
-                    const role = msgReaction.message.guild.roles.cache.get(event.roleID);
-                    if (role) {
-                        msgReaction.message.guild.members.cache.get(user.id).roles.remove(role);
-                    }
+                    this._roleHandler.removeRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
                     break;
                 case '⏰':
                     if (event.date) {
