@@ -53,7 +53,7 @@ export class StatHandler {
                 - Have more than one member in it
             */
             const voiceChannels = this._client.channels.cache.array().filter((c: any) => {
-                c.guild
+                return c.guild
                     && c.guild.id === config.guildID
                     && c.type === 'voice'
                     && !config.levelExcludedVoiceChannels.includes(c.id)
