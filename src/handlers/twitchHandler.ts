@@ -137,7 +137,7 @@ export class TwitchHandler {
         const embed = new MessageEmbed();
         embed.setColor(config.embedColor);
         embed.setTitle(`${data.title}`);
-        embed.setDescription(`<@${config.twitchUsers[data.user_id]}> went live!\n\n<:twitch:706570730984439848> [Join here](https://www.twitch.tv/${data.user_name})`);
+        embed.setDescription(`<@${config.twitchUsers[data.user_id]}> went live!\n\n<:twitch:718751320386830367> [Join here](https://www.twitch.tv/${data.user_name})`);
         this._twitchChannel.send(`<@&${config.twitchRoleID}>`, embed);
     }
 

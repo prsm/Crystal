@@ -132,7 +132,7 @@ export default class statCommand implements BotCommand {
 
         const databaseStats = fs.statSync('./database/bot.db');
         const fileSize = databaseStats.size / 1000 / 1000;
-        embed.addField(':card_box: Database Size', `${fileSize} mb`, true);
+        embed.addField(':card_box: Database Size', `${fileSize.toFixed(1)} mb`, true);
 
         msg.channel.send(embed);
     }
