@@ -1,4 +1,4 @@
-import { Client, VoiceChannel } from 'discord.js';
+import { Client, VoiceChannel, GuildMember } from 'discord.js';
 import ns from 'node-schedule';
 
 import { Bot } from '../bot';
@@ -47,22 +47,29 @@ export class StatHandler {
     private _initVoiceChannelStats() {
         // check voice connections every minute (to provide detailed voice stats)
         ns.scheduleJob('0 * * * * *', () => {
-            const voiceChannels = this._client.channels.cache.array().filter((c: any) => c.guild && c.guild.id === config.guildID && c.type === 'voice');
+            /** Get all voice channels which:
+                - Are in the rightserver
+                - Aren't excluded from stats
+                - Have more than one member in it
+            */
+            const voiceChannels = this._client.channels.cache.array().filter((c: any) => {
+                c.guild
+                    && c.guild.id === config.guildID
+                    && c.type === 'voice'
+                    && !config.levelExcludedVoiceChannels.includes(c.id)
+                    && c.members.filter((m: GuildMember) => !m.user.bot).size > 1
+            });
             for (const c of voiceChannels) {
                 const voiceChannel = c as VoiceChannel;
+                voiceChannel.members.each(m => {
+                    if (m.user.bot) return;
 
-                // if more than one user is connected in this channel
-                if (voiceChannel.members.filter(m => !m.user.bot).size > 1) {
-                    voiceChannel.members.each(m => {
-                        if (m.user.bot) return;
+                    // If user is deafened, don't track him
+                    if (m.voice.deaf) return;
 
-                        // if voice channel is not excluded
-                        if (!config.levelExcludedVoiceChannels.includes(c.id)) {
-                            this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
-                            this._addExperience(m.id, config.experiencePerVoiceMin);
-                        }
-                    });
-                }
+                    this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
+                    this._addExperience(m.id, config.experiencePerVoiceMin);
+                });
             }
         });
     }
