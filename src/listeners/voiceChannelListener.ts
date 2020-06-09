@@ -78,9 +78,9 @@ export class VoiceChannelListener {
         if (Object.keys(emptyChannels).length === 0) {
             // sort channels by name
             this._voiceChannels.sort((a, b) => {
-                if (a.name > b.name) return 1;
-                if (a.name < b.name) return -1;
-                return 0;
+                const numberA = parseInt(a.name.match(/^.*#(.*)$/)[1]);
+                const numberB = parseInt(b.name.match(/^.*#(.*)$/)[1]);
+                return numberA - numberB;
             });
             // get last number
             const number = parseInt(this._voiceChannels[this._voiceChannels.length - 1].name.match(/^.*#(.*)$/)[1]);
