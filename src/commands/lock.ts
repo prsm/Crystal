@@ -31,9 +31,13 @@ export default class lockCommand implements BotCommand {
             msg.channel.send(':x: Your voice channel is not a dynamic voice channel.');
             return;
         }
-        // if no arguments were provided, unlock the channel (set userlimit to 0)
+        // if no arguments were provided, either lock to current amount or unlock the channel (set userlimit to 0)
         if (!args[0]) {
-            msg.member.voice.channel.setUserLimit(0);
+            if (msg.member.voice.channel.userLimit === 0) {
+                msg.member.voice.channel.setUserLimit(msg.member.voice.channel.members.size);
+            } else {
+                msg.member.voice.channel.setUserLimit(0);
+            }
             return;
         }
         // check if argument is a number and between 0 and 99
