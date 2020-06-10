@@ -85,10 +85,30 @@ export class VoiceChannelListener {
             // get last number
             const number = parseInt(this._voiceChannels[this._voiceChannels.length - 1].name.match(/^.*#(.*)$/)[1]);
 
+            // Get max bitrate based on guild premium tier
+            let bitrate: number;
+            switch (this._channelManager.guild.premiumTier) {
+                case 0:
+                    bitrate = 96000;
+                    break;
+                case 1:
+                    bitrate = 128000;
+                    break;
+                case 2:
+                    bitrate = 256000;
+                    break;
+                case 3:
+                    bitrate = 384000;
+                    break;
+                default:
+                    bitrate = 96000;
+            }
+
             // create new channel under the right category
             const createdChannel = await this._channelManager.create(`voice #${number + 1}`, {
                 type: 'voice',
-                parent: this._dynamicCategory
+                parent: this._dynamicCategory,
+                bitrate: bitrate
             });
 
             // update channel array
