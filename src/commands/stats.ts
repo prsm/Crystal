@@ -89,6 +89,8 @@ export default class statCommand implements BotCommand {
         embed.setTitle('Server Stats');
         embed.setAuthor(guild.name, guild.iconURL());
         embed.setColor(config.embedColor);
+        embed.setDescription('_Tracking since 06.06.2020_');
+
         embed.addField(':chart_with_upwards_trend:Members', `\`${guild.memberCount}\``, true);
 
         const sentMessageCount = await this._messageStatRepository.count();
@@ -153,6 +155,7 @@ export default class statCommand implements BotCommand {
         embed.setTitle(`${member.displayName}'s stats`);
         embed.setColor(member.displayHexColor);
         embed.setThumbnail(member.user.avatarURL({ dynamic: true }));
+        embed.setDescription('_Tracking since 06.06.2020_');
 
         embed.addField(':calendar_spiral: Joined Server', `\`${moment(member.joinedAt).format('DD.MM.YYYY')}\``);
 
