@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Message, MessageEmbed, Client, version } from 'discord.js';
+import { Message, MessageEmbed, Client, version, GuildMember } from 'discord.js';
 import { Repository } from 'typeorm';
 import moment from 'moment';
 
@@ -16,12 +16,12 @@ export default class statCommand implements BotCommand {
         id: 6,
         name: 'stats',
         category: 'Stats',
-        description: 'Show different stats\n\nParameters:\n`server` - Current stats about the server\n`bot` - Stats about the bot.',
+        description: 'Show different stats\n\nParameters:\n`server` - Current stats about the server\n`bot` - Stats about the bot.\n`me`/`@User` - Stats about a specific user.',
         argsRequired: true,
         admin: false,
         aliases: ['s'],
         usage: 'stats',
-        examples: ['stats server', 'stats bot'],
+        examples: ['stats server', 'stats bot', 'stats me', 'stats @Jannik66'],
         showInHelp: true
     }
 
@@ -65,8 +65,19 @@ export default class statCommand implements BotCommand {
             case 'b':
                 this._botStats(msg, args);
                 break;
+            case 'me':
+                this._userStats(msg, args, msg.member);
+                break;
             default:
-                msg.channel.send(':x: Unknown argument.\nKnown arguments:\nServer Stats: `server`/`s`/`srv`/`guild`\nBot Stats: `bot`/`b`');
+                if (args[0].match(/^<@!?[0-9]*>$/)) {
+                    if (msg.mentions.members.first().user.bot) {
+                        msg.channel.send(`:x: ${msg.mentions.members.first().displayName} is a bot.`);
+                        return;
+                    }
+                    this._userStats(msg, args, msg.mentions.members.first());
+                } else {
+                    msg.channel.send(':x: Unknown argument.\nKnown arguments:\nServer Stats: `server`/`s`/`srv`/`guild`\nBot Stats: `bot`/`b`\nUser Stats: `me`/`@User`');
+                }
                 break;
         }
     }
@@ -78,6 +89,8 @@ export default class statCommand implements BotCommand {
         embed.setTitle('Server Stats');
         embed.setAuthor(guild.name, guild.iconURL());
         embed.setColor(config.embedColor);
+        embed.setDescription('_Tracking since 06.06.2020_');
+
         embed.addField(':chart_with_upwards_trend:Members', `\`${guild.memberCount}\``, true);
 
         const sentMessageCount = await this._messageStatRepository.count();
@@ -133,6 +146,44 @@ export default class statCommand implements BotCommand {
         const databaseStats = fs.statSync('./database/bot.db');
         const fileSize = databaseStats.size / 1000 / 1000;
         embed.addField(':card_box: Database Size', `${fileSize.toFixed(1)} mb`, true);
+
+        msg.channel.send(embed);
+    }
+
+    private async _userStats(msg: Message, args: string[], member: GuildMember) {
+        const embed = new MessageEmbed();
+        embed.setTitle(`${member.displayName}'s stats`);
+        embed.setColor(member.displayHexColor);
+        embed.setThumbnail(member.user.avatarURL({ dynamic: true }));
+        embed.setDescription('_Tracking since 06.06.2020_');
+
+        embed.addField(':calendar_spiral: Joined Server', `\`${moment(member.joinedAt).format('DD.MM.YYYY')}\``);
+
+        // get sent messages count
+        const messageSats = await this._messageStatRepository.createQueryBuilder('messageStat')
+            .select('count(Id)', 'msgCount')
+            .groupBy('messageStat.userID')
+            .where(`messageStat.userID = ${member.id}`)
+            .getRawOne();
+
+        // get total voice minutes
+        const voiceStats = await this._voiceStatRepository.createQueryBuilder('voiceStat')
+            .select('count(Id)', 'min')
+            .groupBy('voiceStat.userID')
+            .where(`voiceStat.userID = ${member.id}`)
+            .getRawOne();
+
+        // get all levels to determine index of user (place in leaderboard)
+        const levels = await this._userLevelRepository.find({ order: { exp: 'DESC' } });
+
+        // find index of user in levels
+        const index = levels.findIndex(l => l.userID === member.id);
+
+        embed.addField(':envelope: Sent Messages', `\`${messageSats ? messageSats.msgCount : 0}x\``, true);
+        embed.addField(':stopwatch: Voice Time', `\`${this._formatVoiceMinutes(voiceStats ? voiceStats.min : 0)}\``, true);
+
+        const expString = index >= 0 ? `\`${levels[index].exp}xp | ${index + 1}. place\`` : '\`0xp\`';
+        embed.addField(':star: Experience', expString, true);
 
         msg.channel.send(embed);
     }
