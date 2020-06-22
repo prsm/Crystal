@@ -69,15 +69,7 @@ export default class statCommand implements BotCommand {
                 this._userStats(msg, args, msg.member);
                 break;
             default:
-                if (args[0].match(/^<@!?[0-9]*>$/)) {
-                    if (msg.mentions.members.first().user.bot) {
-                        msg.channel.send(`:x: ${msg.mentions.members.first().displayName} is a bot.`);
-                        return;
-                    }
-                    this._userStats(msg, args, msg.mentions.members.first());
-                } else {
-                    msg.channel.send(':x: Unknown argument.\nKnown arguments:\nServer Stats: `server`/`s`/`srv`/`guild`\nBot Stats: `bot`/`b`\nUser Stats: `me`/`@User`');
-                }
+                msg.channel.send(':x: Unknown argument.\nKnown arguments:\nServer Stats: `server`/`s`/`srv`/`guild`\nBot Stats: `bot`/`b`\nUser Stats: `me`/`@User`');
                 break;
         }
     }
@@ -151,6 +143,7 @@ export default class statCommand implements BotCommand {
     }
 
     private async _userStats(msg: Message, args: string[], member: GuildMember) {
+        console.log(member.user.dmChannel);
         const embed = new MessageEmbed();
         embed.setTitle(`${member.displayName}'s stats`);
         embed.setColor(member.displayHexColor);
@@ -185,7 +178,10 @@ export default class statCommand implements BotCommand {
         const expString = index >= 0 ? `\`${levels[index].exp}xp | ${index + 1}. place\`` : '\`0xp\`';
         embed.addField(':star: Experience', expString, true);
 
-        msg.channel.send(embed);
+        if (!msg.author.dmChannel) {
+            await msg.author.createDM();
+        }
+        msg.author.dmChannel.send(embed);
     }
 
     // format seconds to a better readable format
