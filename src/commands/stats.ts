@@ -143,7 +143,6 @@ export default class statCommand implements BotCommand {
     }
 
     private async _userStats(msg: Message, args: string[], member: GuildMember) {
-        console.log(member.user.dmChannel);
         const embed = new MessageEmbed();
         embed.setTitle(`${member.displayName}'s stats`);
         embed.setColor(member.displayHexColor);
