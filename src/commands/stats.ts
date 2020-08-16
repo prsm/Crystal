@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Message, MessageEmbed, Client, version, GuildMember } from 'discord.js';
+import { Message, MessageEmbed, Client, version, GuildMember, MessageAttachment, User, Guild } from 'discord.js';
 import { Repository } from 'typeorm';
 import moment from 'moment';
 
@@ -10,6 +10,8 @@ import { MemberCountStat } from '../entities/memberCountStat';
 import { UserLevel } from '../entities/userLevel';
 import { BotCommand } from '../customInterfaces';
 import config from '../config';
+import { lineChart } from '../chartConfig';
+import { ChartHandler } from '../handlers/chartHandler';
 
 export default class statCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -31,6 +33,7 @@ export default class statCommand implements BotCommand {
     private _voiceStatRepository: Repository<VoiceStat>;
     private _memberCountStatRepository: Repository<MemberCountStat>;
     private _userLevelRepository: Repository<UserLevel>;
+    private _chartHandler: ChartHandler;
 
     private _numbers: string[] = [
         '1⃣',
@@ -51,6 +54,7 @@ export default class statCommand implements BotCommand {
         this._voiceStatRepository = this._bot.getDatabase().getVoiceStatRepository();
         this._memberCountStatRepository = this._bot.getDatabase().getMemberCountStatRepository();
         this._userLevelRepository = this._bot.getDatabase().getUserLevelRepository();
+        this._chartHandler = new ChartHandler();
     }
 
     public async execute(msg: Message, args: string[]) {
@@ -144,12 +148,12 @@ export default class statCommand implements BotCommand {
 
     private async _userStats(msg: Message, args: string[], member: GuildMember) {
         const embed = new MessageEmbed();
-        embed.setTitle(`${member.displayName}'s stats`);
+        embed.setTitle(`Your server stats:`);
         embed.setColor(member.displayHexColor);
         embed.setThumbnail(member.user.avatarURL({ dynamic: true }));
         embed.setDescription('_Tracking since 06.06.2020_');
 
-        embed.addField(':calendar_spiral: Joined Server', `\`${moment(member.joinedAt).format('DD.MM.YYYY')}\``);
+        // embed.addField(':calendar_spiral: Joined Server', `\`${moment(member.joinedAt).format('DD.MM.YYYY')}\``);
 
         // get sent messages count
         const messageSats = await this._messageStatRepository.createQueryBuilder('messageStat')
@@ -165,6 +169,13 @@ export default class statCommand implements BotCommand {
             .where(`voiceStat.userID = ${member.id}`)
             .getRawOne();
 
+        const lastWeekDate = moment().subtract(7, 'days').toISOString();
+        const lastWeekVoice = await this._voiceStatRepository.createQueryBuilder('voiceStat')
+            .select('count(Id)', 'min')
+            .groupBy('voiceStat.userID')
+            .where(`voiceStat.userID = ${member.id} AND voiceStat.timestamp > '${lastWeekDate}'`)
+            .getRawOne();
+
         // get all levels to determine index of user (place in leaderboard)
         const levels = await this._userLevelRepository.find({ order: { exp: 'DESC' } });
 
@@ -172,7 +183,7 @@ export default class statCommand implements BotCommand {
         const index = levels.findIndex(l => l.userID === member.id);
 
         embed.addField(':envelope: Sent Messages', `\`${messageSats ? messageSats.msgCount : 0}x\``, true);
-        embed.addField(':stopwatch: Voice Time', `\`${this._formatVoiceMinutes(voiceStats ? voiceStats.min : 0)}\``, true);
+        embed.addField(':stopwatch: Voice Time', `\`Total: ${this._formatVoiceMinutes(voiceStats ? voiceStats.min : 0)}\`\n\`This week: ${this._formatVoiceMinutes(lastWeekVoice ? lastWeekVoice.min : 0)}\``, true);
 
         const expString = index >= 0 ? `\`${levels[index].exp}xp | ${index + 1}. place\`` : '\`0xp\`';
         embed.addField(':star: Experience', expString, true);
@@ -181,6 +192,18 @@ export default class statCommand implements BotCommand {
             await msg.author.createDM();
         }
         msg.author.dmChannel.send(embed);
+
+        // Chart generation
+        const fileName = new Date().getTime().toString();
+        const filePath = `./database/${fileName}.png`;
+
+        await this._generateUserStatChart(member.id, filePath);
+
+        // send chart
+        await msg.author.dmChannel.send(new MessageAttachment(filePath));
+
+        // delete chart after sending it to discord
+        fs.unlinkSync(filePath);
     }
 
     // format seconds to a better readable format
@@ -202,5 +225,37 @@ export default class statCommand implements BotCommand {
             (duration.asHours() > 0 ? `${Math.floor(duration.asHours())}h ` : '') +
             `${duration.minutes()}m`
         );
+    }
+
+    private async _generateUserStatChart(userId: string, filePath: string) {
+        const chartConfig = lineChart;
+        const lastWeekDate = moment().hour(0).minute(0).add('1', 'day').subtract(7, 'days');
+
+        const editable = moment(lastWeekDate);
+        chartConfig.data.labels = [];
+        for (let i = 1; i <= 7; i++) {
+            chartConfig.data.labels.push(editable.format('DD.MM'));
+            editable.add('1', 'day');
+        }
+
+        const lastWeekVoice: { timestamp: string }[] = await this._voiceStatRepository.createQueryBuilder('voiceStat')
+            .select('timestamp', 'timestamp')
+            .where(`voiceStat.userID = '${userId}' AND voiceStat.timestamp > '${lastWeekDate.toISOString()}'`)
+            .getRawMany();
+
+        const days: any[][] = [[], [], [], [], [], [], []];
+
+        lastWeekVoice.forEach(voiceStat => {
+            const day = moment(voiceStat.timestamp).diff(lastWeekDate, 'day');
+            days[day].push(voiceStat);
+        });
+        const minutesPerDay = days.map(a => a.length);
+
+        chartConfig.data.datasets[0].data = minutesPerDay;
+        chartConfig.data.datasets[0].borderColor = '#429bb8';
+
+        chartConfig.options.title.text = 'Voice minutes in the last week';
+
+        await this._chartHandler.draw(1500, 1000, chartConfig, filePath);
     }
 }

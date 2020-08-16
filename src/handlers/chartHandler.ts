@@ -1,5 +1,6 @@
 import jsdom from 'jsdom';
 import fs from 'fs';
+import jimp from 'jimp';
 
 import config from '../config';
 
@@ -8,7 +9,7 @@ export class ChartHandler {
 
     constructor() { }
 
-    public async draw(width: number, height: number, configuration: any) {
+    public async draw(width: number, height: number, configuration: any, filePath: string) {
         this._setOptions(configuration);
         const dom = new jsdom.JSDOM(`
         <html>
@@ -34,16 +35,16 @@ export class ChartHandler {
             
             ctx = canvas.getContext('2d');
 
-            Chart.defaults.global.defaultFontSize=30;
-            Chart.defaults.global.defaultFontColor='#FFFFFF';
+            Chart.defaults.global.defaultFontSize=50;
+            Chart.defaults.global.defaultFontColor='#000000';
 
-            const generatedChart = new Chart(ctx, ${JSON.stringify(configuration)});
-            const base64 = generatedChart.toBase64Image();
+            new Chart(ctx, ${JSON.stringify(configuration)});
+            const base64 = canvas.toDataURL();
             imageP.innerHTML = base64;
         `);
 
         // save chart to file
-        await this._writeImageToFile('./database/chart.png');
+        await this._writeImageToFile(filePath, width, height);
     }
 
     // set options which are required
@@ -53,8 +54,13 @@ export class ChartHandler {
     }
 
     // get base64 string and save it to a png image
-    private async _writeImageToFile(filePath: string) {
+    private async _writeImageToFile(filePath: string, width: number, height: number) {
         fs.writeFileSync(filePath, this._window.document.getElementById('base64Image').innerHTML.replace(/^data:image\/png;base64,/, ''), { encoding: 'base64' });
+
+        const image = await jimp.read(filePath);
+
+        const bgImage = new jimp(width, height, '#FFFFFF');
+        bgImage.composite(image, 0, 0).write(filePath);
     }
 
 }
