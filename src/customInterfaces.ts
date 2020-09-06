@@ -54,6 +54,7 @@ export interface BotConfig {
     botVersionDate: string,
     roleSeparatorID: string,
     eventSeparatorID: string,
+    botChannel: string,
     archiveCategoryID: string
 }
 

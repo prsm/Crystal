@@ -1,5 +1,6 @@
 import { Client, Collection, User, GuildMember, PartialGuildMember } from 'discord.js';
 import fs from 'fs';
+import moment from 'moment';
 
 import { BotDatabase } from './database';
 import { ReactionRoleMsgHandler } from './handlers/reactionRoleMsgHandler';
@@ -44,6 +45,7 @@ export class Bot {
 
     // initial start method
     public async start() {
+        moment.locale('de');
         // create new client
         this._client = new Client();
 
