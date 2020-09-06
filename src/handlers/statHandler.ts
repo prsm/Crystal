@@ -114,8 +114,8 @@ export class StatHandler {
     }
 
     private _initWeeklyBoard() {
-        ns.scheduleJob('0 22 0 0 0', () => {
-        this._generateWeekyBoard();
+        ns.scheduleJob('0 22 * * 0', () => {
+            this._generateWeekyBoard();
         });
     }
 
@@ -189,7 +189,7 @@ export class StatHandler {
         await this._generateMessageStatChart(weekStartDate, messageStatFile);
         await this._generateChannelStatChart(weekStartDate, channelStatFile);
 
-        await botChannel.send(embed);
+        await botChannel.send(`<@&${config.memberRoleID}>`, embed);
         await botChannel.send([new MessageAttachment(voiceStatFile), new MessageAttachment(messageStatFile), new MessageAttachment(channelStatFile)]);
         // delete chart after sending it to discord
         fs.unlinkSync(voiceStatFile);
@@ -270,9 +270,9 @@ export class StatHandler {
             const day = moment(messageStat.timestamp).diff(weekStartDate, 'day');
             days[day].push(messageStat);
         });
-        const minutesPerDay = days.map(a => a.length);
+        const messagesPerDay = days.map(a => a.length);
 
-        chartConfig.data.datasets[0].data = minutesPerDay;
+        chartConfig.data.datasets[0].data = messagesPerDay;
         chartConfig.data.datasets[0].borderColor = '#b375ff';
 
         chartConfig.options.title.text = 'Sent messages in the last week';
