@@ -85,12 +85,15 @@ export class EventHandler {
         // HAS TO BE THE LAST FIELD
         embed.addField('Participants (0)', '\u200B');
 
-        embed.setFooter(`✅ Participate | ${event.date ? '⏰ Reminder | ' : ''}❌ Delete Event`);
+        embed.setFooter(`✅ Participate | ${event.date ? '⏰ Reminder | ' : ''}${event.date ? '💾 Archive Channel | ' : ''}❌ Delete Event`);
         embed.setAuthor(`${author.displayName}`, author.user.avatarURL());
         const eventMessage = await this._eventChannel.send(embed);
         await eventMessage.react('✅');
         if (event.date) {
             await eventMessage.react('⏰');
+        }
+        if (event.channel) {
+            await eventMessage.react('💾');
         }
         await eventMessage.react('❌');
         const databaseEvent: Partial<Event> = {
@@ -123,6 +126,11 @@ export class EventHandler {
                     if (event.date) {
                         await msgReaction.users.fetch();
                         this._updateReminders(msgReaction.message.id, msgReaction.users.cache);
+                    }
+                    break;
+                case '💾':
+                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR')) {
+                        this._archiveEventChannel(event);
                     }
                     break;
                 case '❌':
@@ -178,11 +186,19 @@ export class EventHandler {
         this._eventRepository.save(event);
     }
 
+    private async _archiveEventChannel(event: Event) {
+        if (event.channelID) {
+            const eventChannel = this._client.channels.cache.get(event.channelID) as TextChannel;
+            // move eventChannel in archive category and sync permissions
+            await eventChannel.setParent(config.archiveCategoryID);
+            await eventChannel.lockPermissions();
+        }
+    }
+
     private async _deleteEvent(event: Event) {
         await this._eventChannel.messages.fetch();
         this._eventChannel.messages.cache.get(event.eventMessageID).delete();
         if (event.channelID) {
-            this._client.channels.cache.get(event.channelID).delete();
             this._client.guilds.cache.get(config.guildID).roles.cache.get(event.roleID).delete();
         }
         for (const reminderMsg of event.reminderMsgs) {
