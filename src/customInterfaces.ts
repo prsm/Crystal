@@ -53,7 +53,8 @@ export interface BotConfig {
     botVersion: string,
     botVersionDate: string,
     roleSeparatorID: string,
-    eventSeparatorID: string
+    eventSeparatorID: string,
+    botChannel: string
 }
 
 export enum RoleType {

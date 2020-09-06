@@ -36,7 +36,7 @@ export class ChartHandler {
             ctx = canvas.getContext('2d');
 
             Chart.defaults.global.defaultFontSize=50;
-            Chart.defaults.global.defaultFontColor='#000000';
+            Chart.defaults.global.defaultFontColor='#FFFFFF';
 
             new Chart(ctx, ${JSON.stringify(configuration)});
             const base64 = canvas.toDataURL();
@@ -59,7 +59,7 @@ export class ChartHandler {
 
         const image = await jimp.read(filePath);
 
-        const bgImage = new jimp(width, height, '#FFFFFF');
+        const bgImage = new jimp(width, height, '#36393F');
         bgImage.composite(image, 0, 0).write(filePath);
     }
 
