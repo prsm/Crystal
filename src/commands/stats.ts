@@ -59,12 +59,6 @@ export default class statCommand implements BotCommand {
 
     public async execute(msg: Message, args: string[]) {
         switch (args[0]) {
-            case 'server':
-            case 's':
-            case 'srv':
-            case 'guild':
-                this._serverStats(msg, args);
-                break;
             case 'bot':
             case 'b':
                 this._botStats(msg, args);
@@ -73,57 +67,9 @@ export default class statCommand implements BotCommand {
                 this._userStats(msg, args, msg.member);
                 break;
             default:
-                msg.channel.send(':x: Unknown argument.\nKnown arguments:\nServer Stats: `server`/`s`/`srv`/`guild`\nBot Stats: `bot`/`b`\nUser Stats: `me`/`@User`');
+                msg.channel.send(':x: Unknown argument.\nKnown arguments:\nBot Stats: `bot`/`b`\nUser Stats: `me`');
                 break;
         }
-    }
-
-    // server stats like total membercount, messages, voice minutes and leaderboards
-    private async _serverStats(msg: Message, args: string[]) {
-        const guild = this._client.guilds.cache.get(config.guildID);
-        const embed = new MessageEmbed();
-        embed.setTitle('Server Stats');
-        embed.setAuthor(guild.name, guild.iconURL());
-        embed.setColor(config.embedColor);
-        embed.setDescription('_Tracking since 06.06.2020_');
-
-        embed.addField(':chart_with_upwards_trend:Members', `\`${guild.memberCount}\``, true);
-
-        const sentMessageCount = await this._messageStatRepository.count();
-        embed.addField(':pen_ballpoint:Sent Messages', `\`${sentMessageCount}\``, true);
-
-        const voiceMinuteCount = await this._voiceStatRepository.count();
-        embed.addField(':loud_sound:Total Voice Time', `\`${this._formatVoiceMinutes(voiceMinuteCount)}\``, true);
-
-        embed.addField('\u200B', '\u200B');
-
-        const topMessageSender = await this._messageStatRepository.createQueryBuilder('messageStat')
-            .select('count(Id)', 'count')
-            .addSelect('messageStat.userID', 'userID')
-            .groupBy('messageStat.userID')
-            .orderBy('count', 'DESC')
-            .limit(5)
-            .getRawMany();
-        embed.addField('Top message senders', topMessageSender.length > 0 ? topMessageSender.map((tms, i) => `${this._numbers[i]}<@${tms.userID}>\n:envelope:\`${tms.count}x\``) : 'Pretty empty...', true);
-
-        const topVoiceMembers = await this._voiceStatRepository.createQueryBuilder('voiceStat')
-            .select('count(Id)', 'count')
-            .addSelect('voiceStat.userID', 'userID')
-            .groupBy('voiceStat.userID')
-            .orderBy('count', 'DESC')
-            .limit(5)
-            .getRawMany();
-        embed.addField('Most active in voice', topVoiceMembers.length > 0 ? topVoiceMembers.map((tvm, i) => `${this._numbers[i]}<@${tvm.userID}>\n:stopwatch:\`${this._formatVoiceMinutes(tvm.count)}\``) : 'Pretty empty...', true);
-
-        const topLevels = await this._userLevelRepository.createQueryBuilder('userLevel')
-            .select('userLevel.userID', 'userID')
-            .addSelect('userLevel.exp', 'exp')
-            .orderBy('exp', 'DESC')
-            .limit(5)
-            .getRawMany();
-        embed.addField('Highest levels', topLevels.length > 0 ? topLevels.map((tl, i) => `${this._numbers[i]}<@${tl.userID}>\n:star:\`${tl.exp}xp\``) : 'Pretty empty...', true);
-
-        msg.channel.send(embed);
     }
 
     // bot stats like versions, uptime, size of database
