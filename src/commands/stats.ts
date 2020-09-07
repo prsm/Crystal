@@ -18,12 +18,12 @@ export default class statCommand implements BotCommand {
         id: 6,
         name: 'stats',
         category: 'Stats',
-        description: 'Show different stats\n\nParameters:\n`server` - Current stats about the server\n`bot` - Stats about the bot.\n`me`/`@User` - Stats about a specific user.',
+        description: 'Show different stats\n\nParameters:\n`bot` - Stats about the bot.\n`me` - Stats about you.',
         argsRequired: true,
         admin: false,
         aliases: ['s'],
         usage: 'stats',
-        examples: ['stats server', 'stats bot', 'stats me', 'stats @Jannik66'],
+        examples: ['stats bot', 'stats me'],
         showInHelp: true
     }
 
