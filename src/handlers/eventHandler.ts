@@ -85,7 +85,7 @@ export class EventHandler {
         // HAS TO BE THE LAST FIELD
         embed.addField('Participants (0)', '\u200B');
 
-        embed.setFooter(`✅ Participate | ${event.date ? '⏰ Reminder | ' : ''}${event.date ? '💾 Archive Channel | ' : ''}❌ Delete Event`);
+        embed.setFooter(`✅ Participate | ${event.date ? '⏰ Reminder | ' : ''}${event.channel ? '💾 Archive Channel | ' : ''}❌ Delete Event`);
         embed.setAuthor(`${author.displayName}`, author.user.avatarURL());
         const eventMessage = await this._eventChannel.send(embed);
         await eventMessage.react('✅');
