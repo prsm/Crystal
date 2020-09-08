@@ -137,19 +137,23 @@ export default class statCommand implements BotCommand {
         if (!msg.author.dmChannel) {
             await msg.author.createDM();
         }
-        msg.author.dmChannel.send(embed);
+        await msg.author.dmChannel.send(embed).then(async () => {
+            // Chart generation
+            const fileName = new Date().getTime().toString();
+            const filePath = `./database/${fileName}.png`;
 
-        // Chart generation
-        const fileName = new Date().getTime().toString();
-        const filePath = `./database/${fileName}.png`;
+            await this._generateUserStatChart(member.id, filePath);
 
-        await this._generateUserStatChart(member.id, filePath);
+            msg.channel.send(':love_letter: Check your DMs :)');
+            // send chart
+            await msg.author.dmChannel.send(new MessageAttachment(filePath));
 
-        // send chart
-        await msg.author.dmChannel.send(new MessageAttachment(filePath));
-
-        // delete chart after sending it to discord
-        fs.unlinkSync(filePath);
+            // delete chart after sending it to discord
+            fs.unlinkSync(filePath);
+        }).catch(() => {
+            msg.channel.send('It seem like you have disabled direct messages from PR1SM. Please enable these so i can send your stats privately.');
+            return;
+        });
     }
 
     // format seconds to a better readable format
