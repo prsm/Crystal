@@ -17,7 +17,7 @@ export class GuildMemberListener {
         if (member.roles.cache.get(config.memberRoleID)) {
             const embed = new MessageEmbed;
             embed.setTitle(`Member left`);
-            embed.setDescription(`${member.toString()} left.`)
+            embed.setDescription(`\`${member.displayName}\`(${member.toString()}) left.\nWe are now \`${member.guild.memberCount}\` members.`)
             embed.setColor(0xdc3545);
             embed.setTimestamp(new Date());
             this._landingChannel.send(embed);
