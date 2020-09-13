@@ -130,7 +130,7 @@ export class TwitchHandler {
         // resubscribe webhooks after 9 days
         setTimeout(() => {
             this._initWebhooks();
-        }, 100 * 60 * 60 * 24 * 9);
+        }, 1000 * 60 * 60 * 24 * 9);
     }
 
     private _sendStreamNotification(data: any) {
