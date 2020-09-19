@@ -127,6 +127,7 @@ export class Bot {
         this._client.on('voiceStateUpdate', async (oldState, newState) => this._voiceChannelListener.evalVoiceStateUpdate(oldState, newState));
 
         // GuildMemberListener
+        this._client.on('guildMemberAdd', async (member: GuildMember | PartialGuildMember) => this._guildMemberListener.evalGuildMemberAdd(member));
         this._client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => this._guildMemberListener.evalGuildMemberRemove(member));
     }
 

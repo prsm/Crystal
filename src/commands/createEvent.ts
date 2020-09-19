@@ -1,6 +1,5 @@
 import { Message } from 'discord.js';
-// @ts-ignore
-import chrono from 'chrono-node';
+import * as chrono from 'chrono-node';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';

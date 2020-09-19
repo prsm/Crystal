@@ -81,20 +81,10 @@ export class MessageListener {
         }
         if (msg.content.toLowerCase() === 'accept') {
             this._roleHandler.addRole(msg.member, config.memberRoleID, RoleType.MEMBERROLE);
-            this._sendJoinMessage(msg.member);
         } else {
             msg.channel.send('Please accept the rules by writing `accept`').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);
             });
         }
-    }
-
-    private _sendJoinMessage(member: GuildMember) {
-        const embed = new MessageEmbed;
-        embed.setTitle(`New Member!`);
-        embed.setDescription(`\`${member.displayName}\`(${member.toString()}) joined.\nWe are now \`${member.guild.memberCount}\` members.`)
-        embed.setColor(0x28a745);
-        embed.setTimestamp(new Date());
-        this._landingChannel.send(embed);
     }
 }
