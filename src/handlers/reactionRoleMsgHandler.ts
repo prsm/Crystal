@@ -45,9 +45,9 @@ export class ReactionRoleMsgHandler {
         const reactions = this._reactionRoleMsg.reactions.cache;
         for (const reaction of reactions) {
             if (roles.find(r => r.emojiID === reaction[0])) {
-                rolesMsg += `\n${this._client.emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}**`;
+                rolesMsg += `\n${this._client.emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}** | \`${this._reactionRoleMsg.guild.roles.cache.get(roles.find(r => r.emojiID === reaction[0]).roleID).members.size}\` Members`;
             } else {
-                console.log(`WARNING: Not role for emoji ${reaction[0]} found...`);
+                console.log(`WARNING: No role for emoji ${reaction[0]} found...`);
                 //this._reactionRoleMsg.reactions.cache.get(reaction[0]).remove();
             }
         }
