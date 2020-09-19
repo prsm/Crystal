@@ -32,22 +32,15 @@ export default class checkChannelsCommand implements BotCommand {
         // get all voice channels and sort them in the right order
         const voiceChannels = guild.channels.cache.filter(c => c.type === 'voice' && c.viewable).sort(this._sortChannels);
 
-        const embed = new MessageEmbed();
-        embed.setColor(config.embedColor);
-        embed.setTitle('Channels');
-        embed.setDescription('I can see the following Channels and create stats from them:');
+        let msgString = 'I can see the following Channels and create stats from them:\n\n';
 
-        embed.addField('Textchannels', textChannels.map(c => `${c.toString()}`), true);
-        embed.addField('Voicechannels', voiceChannels.map(c => `${c.name}`), true);
+        msgString += '**Text Channels**\n' + textChannels.map(c => c.toString()).join('\n') + '\n';
+        msgString += '**Voice Channels**\n' + voiceChannels.map(c => c.name).join('\n') + '\n\n';
 
-        embed.addField('\u200B', '\u200B');
+        msgString += `**Text channels exluded from stats**\n${config.levelExcludedTextChannels.length > 0 ? config.levelExcludedTextChannels.map(id => `<#${id}>`) : 'None'}\n`;
+        msgString += `**Voice channels exluded from stats**\n${config.levelExcludedVoiceChannels.length > 0 ? config.levelExcludedVoiceChannels.map(id => `${guild.channels.cache.get(id).name}`) : 'None'}`;
 
-        embed.addField('Text channels exluded from stats',
-            config.levelExcludedTextChannels.length > 0 ? config.levelExcludedTextChannels.map(id => `<#${id}>`) : 'None', true);
-        embed.addField('Voice channels exluded from stats',
-            config.levelExcludedVoiceChannels.length > 0 ? config.levelExcludedVoiceChannels.map(id => `${guild.channels.cache.get(id).name}`) : 'None', true);
-
-        msg.channel.send(embed);
+        msg.channel.send(msgString);
     }
 
     private _sortChannels(a: GuildChannel, b: GuildChannel): number {
