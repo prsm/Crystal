@@ -114,9 +114,9 @@ export class StatHandler {
     }
 
     private _initWeeklyBoard() {
-        //ns.scheduleJob('0 22 * * 0', () => {
-        this._generateWeekyBoard();
-        //});
+        ns.scheduleJob('0 22 * * 0', () => {
+            this._generateWeekyBoard();
+        });
     }
 
     private async _generateWeekyBoard() {
@@ -152,7 +152,7 @@ export class StatHandler {
             .where(`voiceStat.timestamp > '${beforeWeekStartDate.toISOString()}' AND voiceStat.timestamp < '${weekStartDate.toISOString()}'`)
             .getRawMany();
 
-        const voiceMemberCompared = Math.round(lastWeekVoice.length  * 100 / beforeLastWeekVoice.length - 100);
+        const voiceMemberCompared = Math.round(lastWeekVoice.length * 100 / beforeLastWeekVoice.length - 100);
         const voiceTimeCompared = Math.round(lastWeekVoice.map(v => v.count).reduce((a, b) => a + b) * 100 / beforeLastWeekVoice.map(v => v.count).reduce((a, b) => a + b) - 100);
 
         embed.addField(':loud_sound:Voice Stats', `Total members in voice: \`${lastWeekVoice.length}\` | \`${voiceMemberCompared > 0 ? `+${voiceMemberCompared}` : `${voiceMemberCompared}`}%\`\nTotal voice hours: \`${this._formatVoiceMinutes(lastWeekVoice.map(v => v.count).reduce((a, b) => a + b))}\` | \`${voiceTimeCompared > 0 ? `+${voiceTimeCompared}` : `${voiceTimeCompared}`}%\``, true);
