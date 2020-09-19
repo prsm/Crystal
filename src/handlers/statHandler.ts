@@ -114,13 +114,14 @@ export class StatHandler {
     }
 
     private _initWeeklyBoard() {
-        ns.scheduleJob('0 22 * * 0', () => {
-            this._generateWeekyBoard();
-        });
+        //ns.scheduleJob('0 22 * * 0', () => {
+        this._generateWeekyBoard();
+        //});
     }
 
     private async _generateWeekyBoard() {
         const weekStartDate = moment().weekday(0).hour(0).minute(0).second(0);
+        const beforeWeekStartDate = moment(weekStartDate).subtract(7, 'days');
         const embed = new MessageEmbed();
         const guild = this._client.guilds.cache.get(config.guildID);
 
@@ -135,6 +136,7 @@ export class StatHandler {
             .getRawOne();
 
         embed.addField(':chart_with_upwards_trend:Member Growth', `\`${guild.memberCount - membersAtWeekStart.memberCount_memberCount}\``);
+        embed.addField('\u200B', '\u200B');
 
         const lastWeekVoice: { count: number, timestamp: string, userID: string }[] = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('count(Id)', 'count')
@@ -143,7 +145,17 @@ export class StatHandler {
             .where(`voiceStat.timestamp > '${weekStartDate.toISOString()}'`)
             .getRawMany();
 
-        embed.addField(':loud_sound:Voice Stats', `Total members in voice: \`${lastWeekVoice.length}\`\nTotal voice hours: \`${this._formatVoiceMinutes(lastWeekVoice.map(v => v.count).reduce((a, b) => a + b))}\``, true);
+        const beforeLastWeekVoice: { count: number, timestamp: string, userID: string }[] = await this._voiceStatRepository.createQueryBuilder('voiceStat')
+            .select('count(Id)', 'count')
+            .addSelect('userID', 'userID')
+            .groupBy('userID')
+            .where(`voiceStat.timestamp > '${beforeWeekStartDate.toISOString()}' AND voiceStat.timestamp < '${weekStartDate.toISOString()}'`)
+            .getRawMany();
+
+        const voiceMemberCompared = Math.round(lastWeekVoice.length  * 100 / beforeLastWeekVoice.length - 100);
+        const voiceTimeCompared = Math.round(lastWeekVoice.map(v => v.count).reduce((a, b) => a + b) * 100 / beforeLastWeekVoice.map(v => v.count).reduce((a, b) => a + b) - 100);
+
+        embed.addField(':loud_sound:Voice Stats', `Total members in voice: \`${lastWeekVoice.length}\` | \`${voiceMemberCompared > 0 ? `+${voiceMemberCompared}` : `${voiceMemberCompared}`}%\`\nTotal voice hours: \`${this._formatVoiceMinutes(lastWeekVoice.map(v => v.count).reduce((a, b) => a + b))}\` | \`${voiceTimeCompared > 0 ? `+${voiceTimeCompared}` : `${voiceTimeCompared}`}%\``, true);
 
         const lastWeekMessages: { count: number, timestamp: string, userID: string }[] = await this._messageStatRepository.createQueryBuilder('messageStat')
             .select('count(Id)', 'count')
@@ -152,8 +164,18 @@ export class StatHandler {
             .where(`messageStat.timestamp > '${weekStartDate.toISOString()}'`)
             .getRawMany();
 
-        embed.addField(':pen_ballpoint:Message Stats', `Total message writers: \`${lastWeekMessages.length}\`\nTotal messages: \`${lastWeekMessages.map(m => m.count).reduce((a, b) => a + b)}x\``, true);
-        embed.addField('\u200B', '\u200B', true);
+        const beforeLastWeekMessages: { count: number, timestamp: string, userID: string }[] = await this._messageStatRepository.createQueryBuilder('messageStat')
+            .select('count(Id)', 'count')
+            .addSelect('userID', 'userID')
+            .groupBy('userID')
+            .where(`messageStat.timestamp > '${beforeWeekStartDate.toISOString()}' AND messageStat.timestamp < '${weekStartDate.toISOString()}'`)
+            .getRawMany();
+
+        const msgMemberCompared = Math.round(lastWeekMessages.length * 100 / beforeLastWeekMessages.length - 100);
+        const msgMessagesCompared = Math.round(lastWeekMessages.map(m => m.count).reduce((a, b) => a + b) * 100 / beforeLastWeekMessages.map(m => m.count).reduce((a, b) => a + b) - 100);
+
+        embed.addField(':pen_ballpoint:Message Stats', `Total message writers: \`${lastWeekMessages.length}\` | \`${msgMemberCompared > 0 ? `+${msgMemberCompared}` : `${msgMemberCompared}`}%\`\nTotal messages: \`${lastWeekMessages.map(m => m.count).reduce((a, b) => a + b)}x\` | \`${msgMessagesCompared > 0 ? `+${msgMessagesCompared}` : `${msgMessagesCompared}`}%\``, true);
+        embed.addField('\u200B', '\u200B');
 
         const topVoiceMembers: { count: number, userID: string }[] = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('count(Id)', 'count')
