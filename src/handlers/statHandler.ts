@@ -127,7 +127,7 @@ export class StatHandler {
 
         embed.setTitle(`PR1SM Weekly Leaderboard - KW  ${weekStartDate.format('ww')}`);
         embed.setColor(config.embedColor);
-        embed.setThumbnail(guild.iconURL());
+        embed.setThumbnail(guild.iconURL({ dynamic: true }));
 
         const membersAtWeekStart = await this._memberCountStatRepository.createQueryBuilder('memberCount')
             .select('memberCount', 'memberCount')
@@ -211,7 +211,7 @@ export class StatHandler {
         await this._generateMessageStatChart(weekStartDate, messageStatFile);
         await this._generateChannelStatChart(weekStartDate, channelStatFile);
 
-        await botChannel.send(`<@&${config.memberRoleID}>`, embed);
+        await botChannel.send(`@everyone`, embed);
         await botChannel.send([new MessageAttachment(voiceStatFile), new MessageAttachment(messageStatFile), new MessageAttachment(channelStatFile)]);
         // delete chart after sending it to discord
         fs.unlinkSync(voiceStatFile);
@@ -258,7 +258,7 @@ export class StatHandler {
         chartConfig.data.datasets[0].data = minutesPerDay;
         chartConfig.data.datasets[0].borderColor = '#75d8ff';
 
-        chartConfig.options.title.text = 'Voice minutes in the last week';
+        chartConfig.options.title.text = 'Voice minutes this week';
 
         await this._chartHandler.draw(1500, 1000, chartConfig, filePath);
     }
@@ -297,7 +297,7 @@ export class StatHandler {
         chartConfig.data.datasets[0].data = messagesPerDay;
         chartConfig.data.datasets[0].borderColor = '#b375ff';
 
-        chartConfig.options.title.text = 'Sent messages in the last week';
+        chartConfig.options.title.text = 'Sent messages this week';
 
         await this._chartHandler.draw(1500, 1000, chartConfig, filePath);
     }
