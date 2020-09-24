@@ -1,17 +1,15 @@
 import fs from 'fs';
-import { Message, MessageEmbed, Client, version, GuildMember, MessageAttachment, User, Guild } from 'discord.js';
+import { Message, MessageEmbed, Client, version, GuildMember, MessageAttachment } from 'discord.js';
 import { Repository } from 'typeorm';
 import moment from 'moment';
 
 import { Bot } from '../bot';
 import { MessageStat } from '../entities/messageStat';
 import { VoiceStat } from '../entities/voiceStat';
-import { MemberCountStat } from '../entities/memberCountStat';
-import { UserLevel } from '../entities/userLevel';
-import { BotCommand } from '../customInterfaces';
-import config from '../config';
-import { lineChart } from '../chartConfig';
 import { ChartHandler } from '../handlers/chartHandler';
+import { BotCommand } from '../customInterfaces';
+import { lineChart } from '../chartConfig';
+import config from '../config';
 
 export default class statCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -31,29 +29,12 @@ export default class statCommand implements BotCommand {
 
     private _messageStatRepository: Repository<MessageStat>;
     private _voiceStatRepository: Repository<VoiceStat>;
-    private _memberCountStatRepository: Repository<MemberCountStat>;
-    private _userLevelRepository: Repository<UserLevel>;
     private _chartHandler: ChartHandler;
-
-    private _numbers: string[] = [
-        '1⃣',
-        '2⃣',
-        '3⃣',
-        '4⃣',
-        '5⃣',
-        '6⃣',
-        '7⃣',
-        '8⃣',
-        '9⃣',
-        ':keycap_ten:'
-    ]
 
     constructor(private _bot: Bot) {
         this._client = this._bot.getClient();
         this._messageStatRepository = this._bot.getDatabase().getMessageStatRepository();
         this._voiceStatRepository = this._bot.getDatabase().getVoiceStatRepository();
-        this._memberCountStatRepository = this._bot.getDatabase().getMemberCountStatRepository();
-        this._userLevelRepository = this._bot.getDatabase().getUserLevelRepository();
         this._chartHandler = new ChartHandler();
     }
 
@@ -94,45 +75,53 @@ export default class statCommand implements BotCommand {
 
     private async _userStats(msg: Message, args: string[], member: GuildMember) {
         const embed = new MessageEmbed();
-        embed.setTitle(`Your server stats:`);
+        embed.setTitle(`Your server stats`);
         embed.setColor(member.displayHexColor);
         embed.setThumbnail(member.user.avatarURL({ dynamic: true }));
         embed.setDescription('_Tracking since 06.06.2020_');
 
-        // embed.addField(':calendar_spiral: Joined Server', `\`${moment(member.joinedAt).format('DD.MM.YYYY')}\``);
-
         // get sent messages count
         const messageSats = await this._messageStatRepository.createQueryBuilder('messageStat')
-            .select('count(Id)', 'msgCount')
+            .select('count(Id)', 'count')
+            .addSelect('userID')
             .groupBy('messageStat.userID')
-            .where(`messageStat.userID = ${member.id}`)
-            .getRawOne();
+            .orderBy('count', 'DESC')
+            .getRawMany();
+        const messagesCount = messageSats.find(msgs => msgs.userID === member.id) ? messageSats.find(msgs => msgs.userID === member.id).count : 0;
+        const messagesRank = (messageSats.findIndex(msgs => msgs.userID === member.id) + 1) > 0 ? (messageSats.findIndex(msgs => msgs.userID === member.id) + 1) : '-';
 
         // get total voice minutes
         const voiceStats = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('count(Id)', 'min')
+            .addSelect('userID')
             .groupBy('voiceStat.userID')
-            .where(`voiceStat.userID = ${member.id}`)
-            .getRawOne();
+            .orderBy('min', 'DESC')
+            .getRawMany();
+        const voiceCount = voiceStats.find(voice => voice.userID === member.id) ? voiceStats.find(voice => voice.userID === member.id).min : 0;
+        const voiceRank = (voiceStats.findIndex(voice => voice.userID === member.id) + 1) > 0 ? (voiceStats.findIndex(voice => voice.userID === member.id) + 1) : '-';
 
-        const lastWeekDate = moment().subtract(7, 'days').toISOString();
-        const lastWeekVoice = await this._voiceStatRepository.createQueryBuilder('voiceStat')
+        const weekStartDate = moment().weekday(0).hour(0).minute(0).second(0);
+        const thisWeekMessages = await this._messageStatRepository.createQueryBuilder('messageStat')
+            .select('count(Id)', 'count')
+            .addSelect('userID')
+            .groupBy('messageStat.userID')
+            .orderBy('count', 'DESC')
+            .where(`messageStat.timestamp > '${weekStartDate.toISOString()}'`)
+            .getRawMany();
+        const thisWeekMessagesCount = thisWeekMessages.find(msgs => msgs.userID === member.id) ? thisWeekMessages.find(msgs => msgs.userID === member.id).count : 0;
+        const thisWeekMessagesRank = (thisWeekMessages.findIndex(msgs => msgs.userID === member.id) + 1) > 0 ? (thisWeekMessages.findIndex(msgs => msgs.userID === member.id) + 1) : '-';
+        const thisWeekVoice = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('count(Id)', 'min')
+            .addSelect('userID')
             .groupBy('voiceStat.userID')
-            .where(`voiceStat.userID = ${member.id} AND voiceStat.timestamp > '${lastWeekDate}'`)
-            .getRawOne();
+            .orderBy('min', 'DESC')
+            .where(`voiceStat.timestamp > '${weekStartDate.toISOString()}'`)
+            .getRawMany();
+        const thisWeekVoiceCount = thisWeekVoice.find(voice => voice.userID === member.id) ? thisWeekVoice.find(voice => voice.userID === member.id).min : 0;
+        const thisWeekVoiceRank = (thisWeekVoice.findIndex(voice => voice.userID === member.id) + 1) > 0 ? (thisWeekVoice.findIndex(voice => voice.userID === member.id) + 1) : '-';
 
-        // get all levels to determine index of user (place in leaderboard)
-        const levels = await this._userLevelRepository.find({ order: { exp: 'DESC' } });
-
-        // find index of user in levels
-        const index = levels.findIndex(l => l.userID === member.id);
-
-        embed.addField(':envelope: Sent Messages', `\`${messageSats ? messageSats.msgCount : 0}x\``, true);
-        embed.addField(':stopwatch: Voice Time', `\`Total: ${this._formatVoiceMinutes(voiceStats ? voiceStats.min : 0)}\`\n\`This week: ${this._formatVoiceMinutes(lastWeekVoice ? lastWeekVoice.min : 0)}\``, true);
-
-        const expString = index >= 0 ? `\`${levels[index].exp}xp | ${index + 1}. place\`` : '\`0xp\`';
-        embed.addField(':star: Experience', expString, true);
+        embed.addField(':envelope: Sent Messages', `Total: \`${messagesCount}x\` | Rank \`${messagesRank}\`\nThis week: \`${thisWeekMessagesCount}x\` | Rank \`${thisWeekMessagesRank}\``, true);
+        embed.addField(':stopwatch: Voice Time', `Total: \`${this._formatVoiceMinutes(voiceCount)}\` | Rank \`${voiceRank}\`\nThis week: \`${this._formatVoiceMinutes(thisWeekVoiceCount)}\` | Rank \`${thisWeekVoiceRank}\``, true);
 
         if (!msg.author.dmChannel) {
             await msg.author.createDM();
@@ -140,18 +129,21 @@ export default class statCommand implements BotCommand {
         await msg.author.dmChannel.send(embed).then(async () => {
             // Chart generation
             const fileName = new Date().getTime().toString();
-            const filePath = `./database/${fileName}.png`;
+            const voiceFilePath = `./database/voice_${fileName}.png`;
+            const messageFilePath = `./database/message_${fileName}.png`;
 
-            await this._generateUserStatChart(member.id, filePath);
+            await this._generateUserVoiceStatChart(member.id, voiceFilePath);
+            await this._generateUserMessageStatChart(member.id, messageFilePath);
 
             msg.channel.send(':love_letter: Check your DMs :)');
             // send chart
-            await msg.author.dmChannel.send(new MessageAttachment(filePath));
+            await msg.author.dmChannel.send([new MessageAttachment(voiceFilePath), new MessageAttachment(messageFilePath)]);
 
             // delete chart after sending it to discord
-            fs.unlinkSync(filePath);
+            fs.unlinkSync(voiceFilePath);
+            fs.unlinkSync(messageFilePath);
         }).catch(() => {
-            msg.channel.send('It seem like you have disabled direct messages from PR1SM. Please enable these so i can send your stats privately.');
+            msg.channel.send('It seem like you have disabled direct messages from PR1SM. Please enable these so I can send your stats privately.');
             return;
         });
     }
@@ -177,34 +169,75 @@ export default class statCommand implements BotCommand {
         );
     }
 
-    private async _generateUserStatChart(userId: string, filePath: string) {
+    private async _generateUserVoiceStatChart(userId: string, filePath: string) {
         const chartConfig = lineChart;
-        const lastWeekDate = moment().hour(0).minute(0).add('1', 'day').subtract(7, 'days');
+        const weekStartDate = moment().weekday(0).hour(0).minute(0).second(0);
 
-        const editable = moment(lastWeekDate);
-        chartConfig.data.labels = [];
-        for (let i = 1; i <= 7; i++) {
-            chartConfig.data.labels.push(editable.format('DD.MM'));
-            editable.add('1', 'day');
-        }
+        chartConfig.data.labels = [
+            'Mo',
+            'Di',
+            'Mi',
+            'Do',
+            'Fr',
+            'Sa',
+            'So'
+        ];
 
+        // Fetch data from database
         const lastWeekVoice: { timestamp: string }[] = await this._voiceStatRepository.createQueryBuilder('voiceStat')
             .select('timestamp', 'timestamp')
-            .where(`voiceStat.userID = '${userId}' AND voiceStat.timestamp > '${lastWeekDate.toISOString()}'`)
+            .where(`voiceStat.userID = '${userId}' AND voiceStat.timestamp > '${weekStartDate.toISOString()}'`)
             .getRawMany();
 
         const days: any[][] = [[], [], [], [], [], [], []];
 
         lastWeekVoice.forEach(voiceStat => {
-            const day = moment(voiceStat.timestamp).diff(lastWeekDate, 'day');
+            const day = moment(voiceStat.timestamp).diff(weekStartDate, 'day');
             days[day].push(voiceStat);
         });
         const minutesPerDay = days.map(a => a.length);
 
         chartConfig.data.datasets[0].data = minutesPerDay;
-        chartConfig.data.datasets[0].borderColor = '#429bb8';
+        chartConfig.data.datasets[0].borderColor = '#75d8ff';
 
-        chartConfig.options.title.text = 'Voice minutes in the last week';
+        chartConfig.options.title.text = 'Voice minutes this week';
+
+        await this._chartHandler.draw(1500, 1000, chartConfig, filePath);
+    }
+
+    private async _generateUserMessageStatChart(userId: string, filePath: string) {
+        const chartConfig = lineChart;
+        const weekStartDate = moment().weekday(0).hour(0).minute(0).second(0);
+
+        chartConfig.data.labels = [
+            'Mo',
+            'Di',
+            'Mi',
+            'Do',
+            'Fr',
+            'Sa',
+            'So'
+        ];
+
+        // Fetch data from database
+        const lastWeekMessage: { timestamp: string }[] = await this._messageStatRepository.createQueryBuilder('messageStat')
+            .select('timestamp', 'timestamp')
+            .where(`messageStat.userID = '${userId}' AND messageStat.timestamp > '${weekStartDate.toISOString()}'`)
+            .getRawMany();
+
+        const days: any[][] = [[], [], [], [], [], [], []];
+
+        // Create labels
+        lastWeekMessage.forEach(messageStat => {
+            const day = moment(messageStat.timestamp).diff(weekStartDate, 'day');
+            days[day].push(messageStat);
+        });
+        const messagesPerDay = days.map(a => a.length);
+
+        chartConfig.data.datasets[0].data = messagesPerDay;
+        chartConfig.data.datasets[0].borderColor = '#ff67e4';
+
+        chartConfig.options.title.text = 'Sent messages this week';
 
         await this._chartHandler.draw(1500, 1000, chartConfig, filePath);
     }
