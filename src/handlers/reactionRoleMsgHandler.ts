@@ -35,7 +35,7 @@ export class ReactionRoleMsgHandler {
     private async _editMsg() {
         const roles = await this._bot.getDatabase().getReactionRoleRepository().find();
         const embed = this._reactionRoleMsg.embeds[0];
-        let rolesMsg = '';
+        embed.fields = [];
         for (const role of roles) {
             if (!this._reactionRoleMsg.reactions.cache.find(r => r.emoji.id == role.emojiID)) {
                 embed.fields = [];
@@ -45,14 +45,17 @@ export class ReactionRoleMsgHandler {
         const reactions = this._reactionRoleMsg.reactions.cache;
         for (const reaction of reactions) {
             if (roles.find(r => r.emojiID === reaction[0])) {
-                rolesMsg += `\n${this._client.emojis.cache.get(reaction[0])}: **${roles.find(r => r.emojiID === reaction[0]).name}** | \`${this._reactionRoleMsg.guild.roles.cache.get(roles.find(r => r.emojiID === reaction[0]).roleID).members.size}\` Members`;
+                embed.fields.push({
+                    name: `${this._client.emojis.cache.get(reaction[0])} **${roles.find(r => r.emojiID === reaction[0]).name}**`,
+                    value: `\`${this._reactionRoleMsg.guild.roles.cache.get(roles.find(r => r.emojiID === reaction[0]).roleID).members.size}\` Members`,
+                    inline: true
+                }
+                );
             } else {
                 console.log(`WARNING: No role for emoji ${reaction[0]} found...`);
                 //this._reactionRoleMsg.reactions.cache.get(reaction[0]).remove();
             }
         }
-        embed.fields = [];
-        embed.addField('Roles', rolesMsg);
         this._reactionRoleMsg.edit(null, { embed });
     }
 

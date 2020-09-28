@@ -43,11 +43,14 @@ export default class createReactionMsgCommand implements BotCommand {
             msg.channel.send(`:x: No Roles available. Add a reaction role with \`${config.prefix}createrole\``)
             return;
         }
-        let fieldString = '';
         for (const role of roles) {
-            fieldString += `${this._client.emojis.cache.get(role.emojiID)}: **${role.name}**\n`;
+            embed.fields.push({
+                name: `${this._client.emojis.cache.get(role.emojiID)} **${role.name}**`,
+                value: `\`${msg.guild.roles.cache.get(role.roleID).members.size}\` Members`,
+                inline: true
+            }
+            );
         }
-        embed.addField('Roles', fieldString);
         const reactionMsg = await msg.channel.send(embed);
         msg.delete();
         this._react(reactionMsg, roles);
