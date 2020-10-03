@@ -33,7 +33,7 @@ export class ReactionRoleMsgHandler {
     }
 
     private async _editMsg() {
-        const roles = await this._bot.getDatabase().getReactionRoleRepository().find();
+        const roles = await this._bot.getDatabase().getReactionRoleRepository().find({ order: { name: 'ASC' } });
         const embed = this._reactionRoleMsg.embeds[0];
         embed.fields = [];
         for (const role of roles) {
