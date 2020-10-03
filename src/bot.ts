@@ -1,3 +1,4 @@
+import { LockChannelHandler } from './handlers/lockChannelHandler';
 import { Client, Collection, User, GuildMember, PartialGuildMember } from 'discord.js';
 import fs from 'fs';
 import moment from 'moment';
@@ -42,6 +43,7 @@ export class Bot {
     private _reminderHandler: ReminderHandler;
     private _statHandler: StatHandler;
     private _roleHandler: RoleHandler;
+    private _lockChannelHandler: LockChannelHandler;
 
     // initial start method
     public async start() {
@@ -60,6 +62,7 @@ export class Bot {
         this._reminderHandler = new ReminderHandler(this);
         this._statHandler = new StatHandler(this);
         this._roleHandler = new RoleHandler(this);
+        this._lockChannelHandler = new LockChannelHandler(this);
 
         // create listnerers
         this._messageListener = new MessageListener(this);
@@ -101,6 +104,9 @@ export class Bot {
     }
     public getRoleHandler(): RoleHandler {
         return this._roleHandler;
+    }
+    public getLockChannelHandler(): LockChannelHandler {
+        return this._lockChannelHandler;
     }
 
     // init event listeners
