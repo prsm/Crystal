@@ -1,6 +1,6 @@
 {
   "name": "crystal",
-  "version": "2.2.5",
+  "version": "2.3.0",
   "main": "app.ts",
   "scripts": {
     "start": "node dist/app.js",
