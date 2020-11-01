@@ -130,6 +130,13 @@ export default class createEventCommand implements BotCommand {
                         event.color = value;
                     }
                     break;
+                case 'limit':
+                    if (!value.match(/^\d+$/)) {
+                        msg.channel.send(`:x: Limit has to be a number`);
+                        return;
+                    }
+                    event.limit = parseInt(value);
+                    break;
             }
         }
         if (!event.title) {

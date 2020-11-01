@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Bot } from '../bot';
 import { Event } from '../entities/event';
 import { User as UserEntity } from '../entities/user';
+import { EventUser } from '../entities/eventUser';
 import config from '../config';
 import { ReminderHandler } from './reminderHandler';
 import { ReminderMsg } from '../entities/reminderMsg';
@@ -26,6 +27,7 @@ export class EventHandler {
     private _eventRepository: Repository<Event>;
 
     private _userRepository: Repository<UserEntity>;
+    private _eventUserRepository: Repository<EventUser>;
 
     // GuildChannelManager for creating new channels
     private _channelManager: GuildChannelManager;
@@ -35,6 +37,7 @@ export class EventHandler {
         this._client = this._bot.getClient();
         this._eventRepository = this._bot.getDatabase().getEventRepository();
         this._userRepository = this._bot.getDatabase().getUserRepository();
+        this._eventUserRepository = this._bot.getDatabase().getEventUserRepository();
     }
 
     public async init() {
@@ -72,7 +75,7 @@ export class EventHandler {
                         allow: ['VIEW_CHANNEL']
                     }]
             })
-            infos += `**Channel:**${channel.toString()}`
+            infos += `**Channel:**${channel.toString()}`;
         }
         const embed = new MessageEmbed;
         if (event.color) {
@@ -83,7 +86,7 @@ export class EventHandler {
         if (event.date || event.channel) embed.addField('Infos', infos);
 
         // HAS TO BE THE LAST FIELD
-        embed.addField('Participants (0)', '\u200B');
+        embed.addField(`Participants (0${event.limit ? `/${event.limit}` : ''})`, '\u200B');
 
         embed.setFooter(`✅ Participate | ${event.date ? '⏰ Reminder | ' : ''}${event.channel ? '💾 Archive Channel | ' : ''}❌ Delete Event`);
         embed.setAuthor(`${author.displayName}`, author.user.avatarURL());
@@ -103,14 +106,15 @@ export class EventHandler {
             eventMessageID: eventMessage.id,
             creatorID: author.user.id,
             roleID: role ? role.id : null,
-            withTime: event.withTime
+            withTime: event.withTime,
+            limit: event.limit
         }
         await this._saveToDatabase(databaseEvent);
         this._reminderHandler.loadReminders();
     }
 
     public async handleReaction(msgReaction: MessageReaction, user: User, action: 0 | 1) {
-        const event = await this._eventRepository.findOne({ where: { eventMessageID: msgReaction.message.id }, relations: ['reminderMsgs'] });
+        const event = await this._eventRepository.findOne({ where: { eventMessageID: msgReaction.message.id }, relations: ['reminderMsgs', 'participants'] });
 
         // should not happen
         if (!event) return;
@@ -119,7 +123,7 @@ export class EventHandler {
             switch (msgReaction.emoji.name) {
                 case '✅':
                     await msgReaction.users.fetch();
-                    this._updateParticipants(msgReaction.message, msgReaction.users.cache);
+                    this._updateParticipants(msgReaction.message, user, action, event);
                     if (event.roleID) this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
                     break;
                 case '⏰':
@@ -143,7 +147,7 @@ export class EventHandler {
             switch (msgReaction.emoji.name) {
                 case '✅':
                     await msgReaction.users.fetch();
-                    this._updateParticipants(msgReaction.message, msgReaction.users.cache);
+                    this._updateParticipants(msgReaction.message, user, action, event);
                     if (event.roleID) this._roleHandler.removeRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
                     break;
                 case '⏰':
@@ -156,21 +160,65 @@ export class EventHandler {
         }
     }
 
-    private async _updateParticipants(eventMsg: Message, reactedUsers: Collection<string, User>) {
+    private async _updateParticipants(eventMsg: Message, user: User, action: 0 | 1, event: Event) {
         const embed = eventMsg.embeds[0];
-        embed.fields.splice(-1, 1);
 
-        const participants = reactedUsers.array().filter(u => !u.bot).map(u => u.id);
-
-        let participantString = '';
-        if (participants.length === 0) {
-            embed.addField(`Participants (${participants.length})`, '\u200B');
-        } else {
-            for (const userId of participants) {
-                participantString += `> <@${userId}>\n`;
-            }
-            embed.addField(`Participants (${participants.length})`, participantString);
+        switch (action) {
+            case 0:
+                await this._eventUserRepository.delete({ userId: user.id, event });
+                break;
+            case 1:
+                const eventUser: Partial<EventUser> = { userId: user.id, joined: new Date().getTime(), event };
+                await this._eventUserRepository.insert(eventUser);
+                break;
         }
+        event = await this._eventRepository.findOne({ where: { id: event.id }, relations: ['reminderMsgs', 'participants'] });
+
+        if (!event.limit ||
+            event.participants.length <= event.limit && action === 1 ||
+            event.participants.length < event.limit && action === 0) {
+            embed.fields.splice(-1, 1);
+        } else {
+            embed.fields.splice(-1, 1);
+            embed.fields.splice(-1, 1);
+        }
+
+        let participants = event.participants;
+
+        if (event.limit) {
+            participants = participants.sort((a, b) => a.joined - b.joined);
+            const realParticipants = participants.slice(0, event.limit);
+            const waitingBench = participants.slice(event.limit);
+
+            let participantString = '';
+            if (realParticipants.length === 0) {
+                embed.addField(`Participants (${realParticipants.length}/${event.limit})`, '\u200B');
+            } else {
+                for (const participant of realParticipants) {
+                    participantString += `> <@${participant.userId}>\n`;
+                }
+                embed.addField(`Participants (${realParticipants.length}/${event.limit})`, participantString);
+            }
+
+            let waitingBenchString = '';
+            if (waitingBench.length > 0) {
+                for (let i = 0; i < waitingBench.length; i++) {
+                    waitingBenchString += `> ${i + 1}. <@${waitingBench[i].userId}>\n`;
+                }
+                embed.addField(`Waiting Bench`, waitingBenchString);
+            }
+        } else {
+            let participantString = '';
+            if (participants.length === 0) {
+                embed.addField(`Participants (${participants.length})`, '\u200B');
+            } else {
+                for (const participant of participants) {
+                    participantString += `> <@${participant.userId}>\n`;
+                }
+                embed.addField(`Participants (${participants.length})`, participantString);
+            }
+        }
+
         eventMsg.edit(null, embed);
     }
 
