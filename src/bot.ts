@@ -151,6 +151,8 @@ export class Bot {
 
     // methods which need a logged in client. Call after bot is ready (called by ready listener)
     public async afterInit() {
+        await this._client.guilds.cache.get(config.guildID).members.fetch();
+
         this._messageListener.init();
         this._voiceChannelListener.loadVoiceChannels();
         this._guildMemberListener.init();
