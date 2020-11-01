@@ -130,6 +130,18 @@ export default class createEventCommand implements BotCommand {
                         event.color = value;
                     }
                     break;
+                case 'limit':
+                    if (!value.match(/^\d+$/)) {
+                        msg.channel.send(`:x: Limit has to be a number`);
+                        return;
+                    }
+                    const limit = parseInt(value);
+                    if (limit < 1 || limit > 50) {
+                        msg.channel.send(`:x: Limit has to be between 1 and 50`);
+                        return;
+                    }
+                    event.limit = parseInt(value);
+                    break;
             }
         }
         if (!event.title) {
