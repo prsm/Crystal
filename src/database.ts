@@ -1,3 +1,4 @@
+import { EventUser } from './entities/eventUser';
 import { ConnectionOptions, createConnection, Connection, Repository } from 'typeorm';
 
 import { Config } from './entities/config';
@@ -15,7 +16,7 @@ import config from './config';
 const options: ConnectionOptions = {
     type: 'sqlite',
     database: `./database/bot.db`,
-    entities: [Config, ReactionRole, Event, User, ReminderMsg, MessageStat, VoiceStat, MemberCountStat, UserLevel],
+    entities: [Config, ReactionRole, Event, User, EventUser, ReminderMsg, MessageStat, VoiceStat, MemberCountStat, UserLevel],
     logging: config.DBLogging
 }
 
@@ -28,6 +29,7 @@ export class BotDatabase {
     private _reactionRoleRepository: Repository<ReactionRole>;
     private _eventRepository: Repository<Event>;
     private _userRepository: Repository<User>;
+    private _eventUserRepository: Repository<EventUser>;
 
     private _messageStat: Repository<MessageStat>;
     private _voiceStat: Repository<VoiceStat>;
@@ -46,6 +48,7 @@ export class BotDatabase {
         this._reactionRoleRepository = this._connection.getRepository(ReactionRole);
         this._eventRepository = this._connection.getRepository(Event);
         this._userRepository = this._connection.getRepository(User);
+        this._eventUserRepository = this._connection.getRepository(EventUser);
 
         this._messageStat = this._connection.getRepository(MessageStat);
         this._voiceStat = this._connection.getRepository(VoiceStat);
@@ -74,6 +77,10 @@ export class BotDatabase {
 
     public getUserRepository(): Repository<User> {
         return this._userRepository;
+    }
+
+    public getEventUserRepository(): Repository<EventUser> {
+        return this._eventUserRepository;
     }
 
     public getMessageStatRepository(): Repository<MessageStat> {
