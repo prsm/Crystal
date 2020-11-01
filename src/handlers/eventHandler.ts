@@ -252,6 +252,7 @@ export class EventHandler {
         for (const reminderMsg of event.reminderMsgs) {
             this._eventChannel.messages.cache.get(reminderMsg.messageId).delete();
         }
+        await this._eventUserRepository.delete({ event });
         await this._bot.getDatabase().getConnection().getRepository(ReminderMsg).delete({ event });
         await this._eventRepository.remove(event);
         this._reminderHandler.loadReminders();
