@@ -239,7 +239,12 @@ export class EventHandler {
             const eventChannel = this._client.channels.cache.get(event.channelID) as TextChannel;
             // move eventChannel in archive category and sync permissions
             await eventChannel.setParent(config.archiveCategoryID);
-            await eventChannel.lockPermissions();
+
+            // it seems like that sometimes, lockPermissions don't work right after changing the parent
+            // Wait 1 second before locking the permissions, this doesn't have any bad side effects
+            setTimeout(() => {
+                eventChannel.lockPermissions();
+            }, 1000);
         }
     }
 
