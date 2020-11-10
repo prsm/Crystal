@@ -59,7 +59,7 @@ export default class shuffleCommand implements BotCommand {
         const m = await msg.channel.send(embed);
 
         const filter = (reaction: MessageReaction, user: User) => {
-            return ['🔀'].includes(reaction.emoji.name) && msg.guild.members.cache.get(user.id).hasPermission('MANAGE_GUILD') && !user.bot;
+            return ['🔀'].includes(reaction.emoji.name) && (msg.guild.members.cache.get(user.id).hasPermission('ADMINISTRATOR') || msg.guild.members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)) && !user.bot;
         };
 
         this._awaitMenuReactions(m, filter, teams);

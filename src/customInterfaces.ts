@@ -55,7 +55,8 @@ export interface BotConfig {
     roleSeparatorID: string,
     eventSeparatorID: string,
     botChannel: string,
-    archiveCategoryID: string
+    archiveCategoryID: string,
+    moderatorRoleID: string
 }
 
 export enum RoleType {

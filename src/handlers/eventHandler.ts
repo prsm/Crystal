@@ -133,12 +133,17 @@ export class EventHandler {
                     }
                     break;
                 case '💾':
-                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR')) {
+                    if (event.creatorID === user.id ||
+                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR') ||
+                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)
+                    ) {
                         this._archiveEventChannel(event);
                     }
                     break;
                 case '❌':
-                    if (event.creatorID === user.id || this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR')) {
+                    if (event.creatorID === user.id ||
+                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR') ||
+                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)) {
                         this._deleteEvent(event);
                     }
                     break;
