@@ -1,3 +1,4 @@
+import { Role } from './role';
 import { Entity, Column, PrimaryGeneratedColumn, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 import { User } from './user';
 import { ReminderMsg } from './reminderMsg';
@@ -29,6 +30,10 @@ export class Event {
     @ManyToMany(type => User)
     @JoinTable()
     remindedUsers: User[];
+
+    @ManyToMany(type => Role)
+    @JoinTable()
+    roles: Role[];
 
     @OneToMany(() => EventUser, eventUser => eventUser.event)
     participants: EventUser[];

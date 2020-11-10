@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Bot } from '../bot';
 import { Event } from '../entities/event';
 import { User as UserEntity } from '../entities/user';
+import { Role as RoleEntity } from '../entities/role';
 import { EventUser } from '../entities/eventUser';
 import config from '../config';
 import { ReminderHandler } from './reminderHandler';
@@ -28,6 +29,7 @@ export class EventHandler {
 
     private _userRepository: Repository<UserEntity>;
     private _eventUserRepository: Repository<EventUser>;
+    private _roleRepository: Repository<RoleEntity>;
 
     // GuildChannelManager for creating new channels
     private _channelManager: GuildChannelManager;
@@ -38,6 +40,7 @@ export class EventHandler {
         this._eventRepository = this._bot.getDatabase().getEventRepository();
         this._userRepository = this._bot.getDatabase().getUserRepository();
         this._eventUserRepository = this._bot.getDatabase().getEventUserRepository();
+        this._roleRepository = this._bot.getDatabase().getRoleRepository();
     }
 
     public async init() {
@@ -75,15 +78,23 @@ export class EventHandler {
                         allow: ['VIEW_CHANNEL']
                     }]
             })
-            infos += `**Channel:**${channel.toString()}`;
+            infos += `**Channel:**${channel.toString()}\n`;
         }
+
+        if (event.roles) {
+            infos += `**Required Role${event.roles.length > 1 ? 's' : ''}:**\n`;
+            event.roles.forEach((role: string) => {
+                infos += `> <@&${role}>\n`;
+            });
+        }
+
         const embed = new MessageEmbed;
         if (event.color) {
             embed.setColor(event.color);
         };
         embed.setTitle(event.title);
         if (event.description) embed.setDescription(event.description);
-        if (event.date || event.channel) embed.addField('Infos', infos);
+        if (event.date || event.channel || event.roles) embed.addField('Infos', infos);
 
         // HAS TO BE THE LAST FIELD
         embed.addField(`Participants (0${event.limit ? `/${event.limit}` : ''})`, '\u200B');
@@ -107,14 +118,24 @@ export class EventHandler {
             creatorID: author.user.id,
             roleID: role ? role.id : null,
             withTime: event.withTime,
-            limit: event.limit
+            limit: event.limit,
+            roles: []
         }
+
+        if (event.roles) {
+            for (const role of event.roles) {
+                const roleEntity: RoleEntity = { id: role };
+                this._roleRepository.save(roleEntity);
+                databaseEvent.roles.push(roleEntity);
+            }
+        }
+
         await this._saveToDatabase(databaseEvent);
         this._reminderHandler.loadReminders();
     }
 
     public async handleReaction(msgReaction: MessageReaction, user: User, action: 0 | 1) {
-        const event = await this._eventRepository.findOne({ where: { eventMessageID: msgReaction.message.id }, relations: ['reminderMsgs', 'participants'] });
+        const event = await this._eventRepository.findOne({ where: { eventMessageID: msgReaction.message.id }, relations: ['reminderMsgs', 'participants', 'roles'] });
 
         // should not happen
         if (!event) return;
@@ -123,8 +144,24 @@ export class EventHandler {
             switch (msgReaction.emoji.name) {
                 case '✅':
                     await msgReaction.users.fetch();
-                    this._updateParticipants(msgReaction.message, user, action, event);
-                    if (event.roleID) this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
+                    if (event.roles.length > 0) {
+                        const memberRoles = this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).roles.cache;
+                        if (memberRoles.some(role => event.roles.some(r => r.id === role.id))) {
+                            this._updateParticipants(msgReaction.message, user, action, event);
+                            if (event.roleID) this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
+                        } else {
+                            if (!user.dmChannel) {
+                                await user.createDM();
+                            }
+                            await user.dmChannel.send(':x: You can\'t participate in this event because you don\'t have any of the required roles.').catch(() => {
+                                // User has dms disabled for this server.
+                            });
+                            msgReaction.users.remove(user.id);
+                        }
+                    } else {
+                        this._updateParticipants(msgReaction.message, user, action, event);
+                        if (event.roleID) this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
+                    }
                     break;
                 case '⏰':
                     if (event.date) {
