@@ -3,6 +3,7 @@ import * as chrono from 'chrono-node';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
+import config from '../config';
 
 export default class createEventCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -141,6 +142,22 @@ export default class createEventCommand implements BotCommand {
                         return;
                     }
                     event.limit = parseInt(value);
+                    break;
+                case 'roles':
+                    if (!value.match(/^[0-9, ]+$/)) {
+                        msg.channel.send(`:x: Invalid role pattern provided. Regex: \`/^[0-9, ]+$/\``);
+                        return;
+                    }
+                    const roles = value.replace(' ', '').split(',');
+
+                    for (let i = 0; i < roles.length; i++) {
+                        if (!this._bot.getClient().guilds.cache.get(config.guildID).roles.cache.has(roles[i])) {
+                            msg.channel.send(`:x: Role \`${roles[i]}\` does not exist :/`);
+                            return;
+                        }
+                    }
+
+                    event.roles = roles;
                     break;
             }
         }
