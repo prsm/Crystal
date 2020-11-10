@@ -44,8 +44,10 @@ export class MessageListener {
         // return if no command was found.
         if (!command) return;
 
-        if (command.information.admin && !msg.member.hasPermission('ADMINISTRATOR')) {
-            msg.channel.send(`:no_entry_sign: Only an admin can execute this command.`);
+        if (command.information.admin &&
+            !msg.member.hasPermission('ADMINISTRATOR') &&
+            !msg.member.roles.cache.has(config.moderatorRoleID)) {
+            msg.channel.send(`:no_entry_sign: Only an admin or moderator can execute this command.`);
             return;
         }
 
