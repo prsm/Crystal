@@ -58,6 +58,9 @@ export default class shuffleCommand implements BotCommand {
 
         const m = await msg.channel.send(embed);
 
+        // Fetch users from guild to ensure the bot finds the correct member
+        await msg.guild.members.fetch();
+
         const filter = (reaction: MessageReaction, user: User) => {
             return ['🔀'].includes(reaction.emoji.name) && (msg.guild.members.cache.get(user.id).hasPermission('ADMINISTRATOR') || msg.guild.members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)) && !user.bot;
         };

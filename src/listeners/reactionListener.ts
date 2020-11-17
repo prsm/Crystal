@@ -25,6 +25,10 @@ export class ReactionListener {
 
     public async reactionAdded(msgReaction: MessageReaction, user: User) {
         if (user.bot) return;
+
+        // Fetch users from guild to ensure the bot finds the user which reacted
+        await msgReaction.message.guild.members.fetch();
+
         if (msgReaction.message.id === this._bot.getReactionRoleMsgHandler().getReactionRoleMsgId()) {
             const role = (await (this._reactionRoleRepository.findOne({ where: { emojiID: msgReaction.emoji.id } })));
             if (msgReaction.message.guild.members.cache.get(user.id).roles.cache.get(role.roleID)) {
@@ -47,6 +51,10 @@ export class ReactionListener {
 
     public async reactionRemoved(msgReaction: MessageReaction, user: User) {
         if (user.bot) return;
+
+        // Fetch users from guild to ensure the bot finds the user which reacted
+        await msgReaction.message.guild.members.fetch();
+
         if (msgReaction.message.channel.id === config.eventChannelID) {
             this._eventHandler.handleReaction(msgReaction, user, 0);
         }

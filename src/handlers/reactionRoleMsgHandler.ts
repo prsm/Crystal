@@ -19,6 +19,8 @@ export class ReactionRoleMsgHandler {
     public async updateReactionRoleMsg() {
         await this.fetchReactionRoleMessage();
         if (this._reactionRoleMsg) {
+            // Fetch users from guild to ensure the bot includes all members in the reaction role msg
+            await this._reactionRoleMsg.guild.members.fetch();
             this._editMsg();
         }
     }
