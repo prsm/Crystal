@@ -12,12 +12,13 @@ import { VoiceStat } from './entities/voiceStat';
 import { MemberCountStat } from './entities/memberCountStat';
 import { UserLevel } from './entities/userLevel';
 import config from './config';
+import { ServerMember } from './entities/serverMember';
 
 // database options
 const options: ConnectionOptions = {
     type: 'sqlite',
     database: `./database/bot.db`,
-    entities: [Config, ReactionRole, Event, User, Role, EventUser, ReminderMsg, MessageStat, VoiceStat, MemberCountStat, UserLevel],
+    entities: [Config, ReactionRole, Event, User, Role, EventUser, ReminderMsg, MessageStat, VoiceStat, MemberCountStat, UserLevel, ServerMember],
     logging: config.DBLogging
 }
 
@@ -38,6 +39,8 @@ export class BotDatabase {
     private _memberCountStat: Repository<MemberCountStat>;
     private _userLevel: Repository<UserLevel>;
 
+    private _serverMember: Repository<ServerMember>;
+
     public async initConnection(): Promise<BotDatabase> {
         // init connection to database
         this._connection = await createConnection(options);
@@ -57,6 +60,8 @@ export class BotDatabase {
         this._voiceStat = this._connection.getRepository(VoiceStat);
         this._memberCountStat = this._connection.getRepository(MemberCountStat);
         this._userLevel = this._connection.getRepository(UserLevel);
+
+        this._serverMember = this._connection.getRepository(ServerMember);
 
         return this;
     }
@@ -104,5 +109,9 @@ export class BotDatabase {
 
     public getUserLevelRepository(): Repository<UserLevel> {
         return this._userLevel;
+    }
+
+    public getServerMemberRepository(): Repository<ServerMember> {
+        return this._serverMember;
     }
 }
