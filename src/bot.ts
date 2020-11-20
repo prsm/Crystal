@@ -49,7 +49,7 @@ export class Bot {
     public async start() {
         moment.locale('de');
         // create new client
-        this._client = new Client();
+        this._client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'CHANNEL', 'MESSAGE', 'REACTION'] });
 
         // init database connection
         await new BotDatabase().initConnection().then((botDB) => {
