@@ -217,7 +217,7 @@ export class EventHandler {
         event = await this._eventRepository.findOne({ where: { id: event.id }, relations: ['reminderMsgs', 'participants'] });
 
         if (!event.limit ||
-            event.participants.length <= event.limit && action === 1 ||
+            event.participants.length <= event.limit + 1 && action === 1 ||
             event.participants.length < event.limit && action === 0) {
             embed.fields.splice(-1, 1);
         } else {
