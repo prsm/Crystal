@@ -1,5 +1,6 @@
 # Transpile typescript into javascript
-FROM node:lts-alpine
+FROM node:lts
+RUN apt-get update || : && apt-get install python -y
 WORKDIR /app
 COPY . .
 RUN npm install
