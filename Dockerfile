@@ -12,4 +12,5 @@ WORKDIR /crystal
 COPY package*.json ./
 RUN npm install --production
 COPY --from=0 ./app/dist .
+COPY ./libraries ./libraries
 CMD npm start
