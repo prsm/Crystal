@@ -6,7 +6,7 @@ RUN npm install
 RUN npm run build
 
 # create image for production
-FROM node:lts-alpine
+FROM node:lts
 RUN apt-get update || : && apt-get install python -y
 WORKDIR /crystal
 COPY package*.json ./

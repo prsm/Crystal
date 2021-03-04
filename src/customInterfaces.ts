@@ -49,7 +49,7 @@ export interface BotConfig {
     levelExcludedVoiceChannels: string[],
     experiencePerMsg: number,
     experiencePerVoiceMin: number,
-    embedColor: number,
+    embedColor: string,
     twitchUsers: { [key: string]: string },
     botVersion: string,
     botVersionDate: string,
