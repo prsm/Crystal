@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Bot } from '../bot';
 import { Config } from '../entities/config';
 import { ReactionRole } from '../entities/reactionRole';
-import config from '../config';
 import { BotCommand } from '../customInterfaces';
 
 export default class createReactionMsgCommand implements BotCommand {
@@ -37,10 +36,10 @@ export default class createReactionMsgCommand implements BotCommand {
         const embed = new MessageEmbed;
         embed.setTitle('Server Roles');
         embed.setDescription('Assign yourself a role by reacting to the message.');
-        embed.setColor(config.embedColor);
+        embed.setColor(this._bot.getConfig().embedColor);
         const roles = await this._reactionRoleRepository.find({ order: { name: 'ASC' } });
         if (roles.length === 0) {
-            msg.channel.send(`:x: No Roles available. Add a reaction role with \`${config.prefix}createrole\``)
+            msg.channel.send(`:x: No Roles available. Add a reaction role with \`${this._bot.getConfig().prefix}createrole\``)
             return;
         }
         for (const role of roles) {

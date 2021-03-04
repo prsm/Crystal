@@ -3,7 +3,6 @@ import { Repository } from 'typeorm';
 
 import { Bot } from '../bot';
 import { ReactionRole } from '../entities/reactionRole';
-import config from '../config';
 import { BotCommand } from '../customInterfaces';
 
 export default class createRoleCommand implements BotCommand {
@@ -48,13 +47,13 @@ export default class createRoleCommand implements BotCommand {
         }
         let role: Role;
         if (roleName.match(/^\d+$/)) {
-            role = this._client.guilds.cache.get(config.guildID).roles.cache.get(roleName);
+            role = this._client.guilds.cache.get(this._bot.getConfig().guildID).roles.cache.get(roleName);
             if (!role) {
                 msg.channel.send(':x: It seems like youv\'ve entered a role id, but the role cannot be found.');
                 return;
             }
         } else {
-            role = await this._client.guilds.cache.get(config.guildID).roles.create({
+            role = await this._client.guilds.cache.get(this._bot.getConfig().guildID).roles.create({
                 data: {
                     name: roleName
                 }

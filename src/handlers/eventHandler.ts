@@ -7,7 +7,6 @@ import { Event } from '../entities/event';
 import { User as UserEntity } from '../entities/user';
 import { Role as RoleEntity } from '../entities/role';
 import { EventUser } from '../entities/eventUser';
-import config from '../config';
 import { ReminderHandler } from './reminderHandler';
 import { ReminderMsg } from '../entities/reminderMsg';
 import { RoleHandler } from './roleHandler';
@@ -45,13 +44,13 @@ export class EventHandler {
 
     public async init() {
         // channel manager for creating new channels
-        this._channelManager = new GuildChannelManager(this._client.guilds.cache.get(config.guildID));
+        this._channelManager = new GuildChannelManager(this._client.guilds.cache.get(this._bot.getConfig().guildID));
 
         // event category
-        this._eventCategory = this._client.channels.cache.get(config.eventCategoryID) as CategoryChannel;
+        this._eventCategory = this._client.channels.cache.get(this._bot.getConfig().eventCategoryID) as CategoryChannel;
 
         // event text channel
-        this._eventChannel = this._client.channels.cache.get(config.eventChannelID) as TextChannel;
+        this._eventChannel = this._client.channels.cache.get(this._bot.getConfig().eventChannelID) as TextChannel;
         await this._eventChannel.messages.fetch();
 
         this._reminderHandler = this._bot.getReminderHandler();
@@ -66,7 +65,7 @@ export class EventHandler {
             infos += `**Date**: ${event.withTime ? moment(event.date).format('DD.MM.YYYY HH:mm') : moment(event.date).format('DD.MM.YYYY')}\n`;
         }
         if (event.channel && event.channel.create) {
-            role = await this._client.guilds.cache.get(config.guildID).roles.create({ data: { name: event.channel.name ? event.channel.name : event.title } });
+            role = await this._client.guilds.cache.get(this._bot.getConfig().guildID).roles.create({ data: { name: event.channel.name ? event.channel.name : event.title } });
             channel = await this._channelManager.create(event.channel.name ? event.channel.name : event.title, {
                 parent: this._eventCategory,
                 permissionOverwrites: [
@@ -145,7 +144,7 @@ export class EventHandler {
                 case '✅':
                     await msgReaction.users.fetch();
                     if (event.roles.length > 0) {
-                        const memberRoles = this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).roles.cache;
+                        const memberRoles = this._client.guilds.cache.get(this._bot.getConfig().guildID).members.cache.get(user.id).roles.cache;
                         if (memberRoles.some(role => event.roles.some(r => r.id === role.id))) {
                             this._updateParticipants(msgReaction.message, user, action, event);
                             if (event.roleID) this._roleHandler.addRole(msgReaction.message.guild.members.cache.get(user.id), event.roleID, RoleType.EVENTROLE);
@@ -171,16 +170,16 @@ export class EventHandler {
                     break;
                 case '💾':
                     if (event.creatorID === user.id ||
-                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR') ||
-                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)
+                        this._client.guilds.cache.get(this._bot.getConfig().guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR') ||
+                        this._client.guilds.cache.get(this._bot.getConfig().guildID).members.cache.get(user.id).roles.cache.has(this._bot.getConfig().moderatorRoleID)
                     ) {
                         this._archiveEventChannel(event);
                     }
                     break;
                 case '❌':
                     if (event.creatorID === user.id ||
-                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR') ||
-                        this._client.guilds.cache.get(config.guildID).members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)) {
+                        this._client.guilds.cache.get(this._bot.getConfig().guildID).members.cache.get(user.id).hasPermission('ADMINISTRATOR') ||
+                        this._client.guilds.cache.get(this._bot.getConfig().guildID).members.cache.get(user.id).roles.cache.has(this._bot.getConfig().moderatorRoleID)) {
                         this._deleteEvent(event);
                     }
                     break;
@@ -280,7 +279,7 @@ export class EventHandler {
         if (event.channelID) {
             const eventChannel = this._client.channels.cache.get(event.channelID) as TextChannel;
             // move eventChannel in archive category and sync permissions
-            await eventChannel.setParent(config.archiveCategoryID);
+            await eventChannel.setParent(this._bot.getConfig().archiveCategoryID);
 
             // it seems like that sometimes, lockPermissions don't work right after changing the parent
             // Wait 1 second before locking the permissions, this doesn't have any bad side effects
@@ -294,7 +293,7 @@ export class EventHandler {
         await this._eventChannel.messages.fetch();
         this._eventChannel.messages.cache.get(event.eventMessageID).delete();
         if (event.channelID) {
-            this._client.guilds.cache.get(config.guildID).roles.cache.get(event.roleID).delete();
+            this._client.guilds.cache.get(this._bot.getConfig().guildID).roles.cache.get(event.roleID).delete();
         }
         for (const reminderMsg of event.reminderMsgs) {
             this._eventChannel.messages.cache.get(reminderMsg.messageId).delete();

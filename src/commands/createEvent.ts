@@ -3,7 +3,6 @@ import * as chrono from 'chrono-node';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
-import config from '../config';
 
 export default class createEventCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -151,7 +150,7 @@ export default class createEventCommand implements BotCommand {
                     const roles = value.replace(' ', '').split(',');
 
                     for (let i = 0; i < roles.length; i++) {
-                        if (!this._bot.getClient().guilds.cache.get(config.guildID).roles.cache.has(roles[i])) {
+                        if (!this._bot.getClient().guilds.cache.get(this._bot.getConfig().guildID).roles.cache.has(roles[i])) {
                             msg.channel.send(`:x: Role \`${roles[i]}\` does not exist :/`);
                             return;
                         }

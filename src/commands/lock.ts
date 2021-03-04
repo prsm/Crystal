@@ -2,7 +2,6 @@ import { Message } from 'discord.js';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
-import config from '../config';
 
 export default class lockCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -27,7 +26,7 @@ export default class lockCommand implements BotCommand {
             return;
         }
         // check if user is in a dynamic voice channel
-        if (msg.member.voice.channel.parentID !== config.dynamicVoiceCategoryID) {
+        if (msg.member.voice.channel.parentID !== this._bot.getConfig().dynamicVoiceCategoryID) {
             msg.channel.send(':x: Your voice channel is not a dynamic voice channel.');
             return;
         }

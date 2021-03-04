@@ -1,7 +1,6 @@
 import { Client, GuildMember, Guild } from "discord.js";
 import { Bot } from "../bot";
 import { RoleType } from "../customInterfaces";
-import config from "../config";
 
 export class RoleHandler {
 
@@ -18,17 +17,17 @@ export class RoleHandler {
     }
 
     public init() {
-        this._guild = this._client.guilds.cache.get(config.guildID);
+        this._guild = this._client.guilds.cache.get(this._bot.getConfig().guildID);
         this.reactionRoleUpdate();
         this.eventRoleUpdate();
     }
 
     public async addRole(member: GuildMember, roleID: string, type: RoleType) {
         if (type == RoleType.REACTIONROLE
-            && !member.roles.cache.get(config.roleSeparatorID)
+            && !member.roles.cache.get(this._bot.getConfig().roleSeparatorID)
             || type == RoleType.EVENTROLE
-            && !member.roles.cache.get(config.eventSeparatorID)) {
-            member.roles.add(type === RoleType.REACTIONROLE ? config.roleSeparatorID : config.eventSeparatorID);
+            && !member.roles.cache.get(this._bot.getConfig().eventSeparatorID)) {
+            member.roles.add(type === RoleType.REACTIONROLE ? this._bot.getConfig().roleSeparatorID : this._bot.getConfig().eventSeparatorID);
         }
         const role = this._guild.roles.cache.get(roleID);
         if (role) {
@@ -46,7 +45,7 @@ export class RoleHandler {
             && !member.roles.cache.some((r) => this.reactionRoleIds.includes(r.id))
             || type == RoleType.EVENTROLE
             && !member.roles.cache.some((r) => this.eventRoleIds.includes(r.id))) {
-            member.roles.remove(type === RoleType.REACTIONROLE ? config.roleSeparatorID : config.eventSeparatorID);
+            member.roles.remove(type === RoleType.REACTIONROLE ? this._bot.getConfig().roleSeparatorID : this._bot.getConfig().eventSeparatorID);
         }
     }
 

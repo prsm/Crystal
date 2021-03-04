@@ -7,7 +7,6 @@ import { RoleHandler } from '../handlers/roleHandler';
 import { ReactionRoleMsgHandler } from '../handlers/reactionRoleMsgHandler';
 import { ReactionRole } from '../entities/reactionRole';
 import { RoleType } from '../customInterfaces';
-import config from '../config';
 
 export class ReactionListener {
 
@@ -44,7 +43,7 @@ export class ReactionListener {
             }
             this._reactionRoleMsgHandler.updateReactionRoleMsg();
             msgReaction.users.remove(user.id);
-        } else if (msgReaction.message.channel.id === config.eventChannelID) {
+        } else if (msgReaction.message.channel.id === this._bot.getConfig().eventChannelID) {
             this._eventHandler.handleReaction(msgReaction, user, 1);
         }
     }
@@ -55,7 +54,7 @@ export class ReactionListener {
         // Fetch user from guild to ensure the bot finds the user which reacted
         await msgReaction.message.guild.members.fetch({ user });
 
-        if (msgReaction.message.channel.id === config.eventChannelID) {
+        if (msgReaction.message.channel.id === this._bot.getConfig().eventChannelID) {
             this._eventHandler.handleReaction(msgReaction, user, 0);
         }
     }

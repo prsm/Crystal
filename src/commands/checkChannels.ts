@@ -1,8 +1,7 @@
-import { Message, Client, MessageEmbed, GuildChannel } from 'discord.js';
+import { Message, Client, GuildChannel } from 'discord.js';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
-import config from '../config';
 
 export default class checkChannelsCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -25,7 +24,7 @@ export default class checkChannelsCommand implements BotCommand {
     }
 
     public async execute(msg: Message, args: string[]) {
-        const guild = this._client.guilds.cache.get(config.guildID);
+        const guild = this._client.guilds.cache.get(this._bot.getConfig().guildID);
 
         // get all text channels and sort them in the right order
         const textChannels = guild.channels.cache.filter(c => c.type === 'text' && c.viewable).sort(this._sortChannels);
@@ -37,8 +36,8 @@ export default class checkChannelsCommand implements BotCommand {
         msgString += '**Text Channels**\n' + textChannels.map(c => c.toString()).join('\n') + '\n';
         msgString += '**Voice Channels**\n' + voiceChannels.map(c => c.name).join('\n') + '\n\n';
 
-        msgString += `**Text channels exluded from stats**\n${config.levelExcludedTextChannels.length > 0 ? config.levelExcludedTextChannels.map(id => `<#${id}>`) : 'None'}\n`;
-        msgString += `**Voice channels exluded from stats**\n${config.levelExcludedVoiceChannels.length > 0 ? config.levelExcludedVoiceChannels.map(id => `${guild.channels.cache.get(id).name}`) : 'None'}`;
+        msgString += `**Text channels exluded from stats**\n${this._bot.getConfig().levelExcludedTextChannels.length > 0 ? this._bot.getConfig().levelExcludedTextChannels.map(id => `<#${id}>`) : 'None'}\n`;
+        msgString += `**Voice channels exluded from stats**\n${this._bot.getConfig().levelExcludedVoiceChannels.length > 0 ? this._bot.getConfig().levelExcludedVoiceChannels.map(id => `${guild.channels.cache.get(id).name}`) : 'None'}`;
 
         msg.channel.send(msgString);
     }

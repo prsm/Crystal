@@ -1,10 +1,9 @@
 import { LockChannelHandler } from './../handlers/lockChannelHandler';
-import { Message, Client, TextChannel } from 'discord.js';
-import moment, { min } from 'moment';
+import { Message, TextChannel } from 'discord.js';
+import moment from 'moment';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
-import config from '../config';
 
 export default class lockChannelCommand implements BotCommand {
     public information: BotCommand['information'] = {

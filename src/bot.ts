@@ -17,8 +17,10 @@ import { ReactionListener } from './listeners/reactionListener';
 import { ReadyListener } from './listeners/readyListener';
 import { VoiceChannelListener } from './listeners/voiceChannelListener';
 
-import { BotCommand } from './customInterfaces';
-import config from './config';
+import { BotCommand, BotConfig } from './customInterfaces';
+
+// @ts-ignore
+import config from './config/config.json';
 
 export class Bot {
     // Discord Client of the Bot
@@ -52,9 +54,9 @@ export class Bot {
         this._client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'CHANNEL', 'MESSAGE', 'REACTION'] });
 
         // init database connection
-        await new BotDatabase().initConnection().then((botDB) => {
-            this._botDB = botDB;
-        });
+        this._botDB = new BotDatabase(this);
+
+        await this._botDB.initConnection();
 
         this._reactionRoleMsgHandler = new ReactionRoleMsgHandler(this);
         this._eventHandler = new EventHandler(this);
@@ -108,6 +110,9 @@ export class Bot {
     public getLockChannelHandler(): LockChannelHandler {
         return this._lockChannelHandler;
     }
+    public getConfig(): BotConfig {
+        return config;
+    }
 
     // init event listeners
     private initEvents() {
@@ -140,7 +145,7 @@ export class Bot {
     // load all commands
     private loadCommands() {
         this._commands = new Collection();
-        const COMMANDFILES = fs.readdirSync(`${config.rootPath}/commands`).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
+        const COMMANDFILES = fs.readdirSync(`./commands`).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
 
         for (const file of COMMANDFILES) {
             const COMMAND = require(`./commands/${file}`).default;

@@ -1,7 +1,6 @@
 import { Client, TextChannel, Message } from 'discord.js';
 
 import { Bot } from '../bot';
-import config from '../config';
 
 export class ReactionRoleMsgHandler {
 

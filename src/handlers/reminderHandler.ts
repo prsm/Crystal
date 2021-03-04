@@ -3,7 +3,6 @@ import moment from 'moment';
 import ns from 'node-schedule';
 
 import { Bot } from '../bot';
-import config from '../config';
 import { Repository } from 'typeorm';
 import { Event } from '../entities/event';
 
@@ -23,7 +22,7 @@ export class ReminderHandler {
     }
 
     init() {
-        this._eventChannel = this._client.channels.cache.get(config.eventChannelID) as TextChannel;
+        this._eventChannel = this._client.channels.cache.get(this._bot.getConfig().eventChannelID) as TextChannel;
         this.loadReminders();
     }
 

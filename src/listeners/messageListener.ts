@@ -1,7 +1,6 @@
-import { Message, Client, GuildMember, TextChannel, MessageEmbed } from 'discord.js';
+import { Message, Client, TextChannel } from 'discord.js';
 
 import { Bot } from '../bot';
-import config from '../config';
 import { RoleHandler } from '../handlers/roleHandler';
 import { RoleType } from '../customInterfaces';
 
@@ -18,13 +17,13 @@ export class MessageListener {
     constructor(private _bot: Bot) {
         this._client = this._bot.getClient();
 
-        this._prefix = config.prefix;
+        this._prefix = this._bot.getConfig().prefix;
 
         this._roleHandler = this._bot.getRoleHandler();
     }
 
     public init() {
-        this._landingChannel = this._bot.getClient().channels.cache.get(config.landingChannelID) as TextChannel;
+        this._landingChannel = this._bot.getClient().channels.cache.get(this._bot.getConfig().landingChannelID) as TextChannel;
     }
 
     public async evalMessage(msg: Message) {
@@ -46,7 +45,7 @@ export class MessageListener {
 
         if (command.information.admin &&
             !msg.member.hasPermission('ADMINISTRATOR') &&
-            !msg.member.roles.cache.has(config.moderatorRoleID)) {
+            !msg.member.roles.cache.has(this._bot.getConfig().moderatorRoleID)) {
             msg.channel.send(`:no_entry_sign: Only an admin or moderator can execute this command.`);
             return;
         }
@@ -75,14 +74,14 @@ export class MessageListener {
 
     public async welcomeMessage(msg: Message) {
         msg.delete();
-        if (msg.member.roles.cache.get(config.memberRoleID)) {
+        if (msg.member.roles.cache.get(this._bot.getConfig().memberRoleID)) {
             msg.channel.send('You are already a Member of this server!').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);
             });
             return;
         }
         if (msg.content.toLowerCase() === 'accept') {
-            this._roleHandler.addRole(msg.member, config.memberRoleID, RoleType.MEMBERROLE);
+            this._roleHandler.addRole(msg.member, this._bot.getConfig().memberRoleID, RoleType.MEMBERROLE);
         } else {
             msg.channel.send('Please accept the rules by writing `accept`').then((botMsg) => {
                 setTimeout(() => { botMsg.delete() }, 10000);

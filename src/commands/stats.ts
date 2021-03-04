@@ -9,7 +9,6 @@ import { VoiceStat } from '../entities/voiceStat';
 import { ChartHandler } from '../handlers/chartHandler';
 import { BotCommand } from '../customInterfaces';
 import { lineChart } from '../chartConfig';
-import config from '../config';
 
 export default class statCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -58,15 +57,15 @@ export default class statCommand implements BotCommand {
         const embed = new MessageEmbed();
         embed.setAuthor(this._client.user.username, this._client.user.avatarURL());
         embed.setTitle('Bot Stats');
-        embed.setColor(config.embedColor);
+        embed.setColor(this._bot.getConfig().embedColor);
 
-        embed.addField(':hash:Version', `**${config.botVersion}** | ${config.botVersionDate}`, true);
+        embed.addField(':hash:Version', `**${this._bot.getConfig().botVersion}** | ${this._bot.getConfig().botVersionDate}`, true);
         embed.addField(':stopwatch:Uptime', `${this._formatUptime(process.uptime())}`, true);
         embed.addField(`Discord.js Version`, `v${version}`, true);
         embed.addField(`Node.js Version`, `${process.version}`, true);
         embed.addField(`:minidisc:Memory Used`, `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} mb`, true);
 
-        const databaseStats = fs.statSync('./database/bot.db');
+        const databaseStats = fs.statSync(this._bot.getConfig().DBPath);
         const fileSize = databaseStats.size / 1000 / 1000;
         embed.addField(':card_box: Database Size', `${fileSize.toFixed(1)} mb`, true);
 
@@ -129,8 +128,8 @@ export default class statCommand implements BotCommand {
         await msg.author.dmChannel.send(embed).then(async () => {
             // Chart generation
             const fileName = new Date().getTime().toString();
-            const voiceFilePath = `./database/voice_${fileName}.png`;
-            const messageFilePath = `./database/message_${fileName}.png`;
+            const voiceFilePath = `${this._bot.getConfig().TempPath}/voice_${fileName}.png`;
+            const messageFilePath = `${this._bot.getConfig().TempPath}/message_${fileName}.png`;
 
             await this._generateUserVoiceStatChart(member.id, voiceFilePath);
             await this._generateUserMessageStatChart(member.id, messageFilePath);

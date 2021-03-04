@@ -1,11 +1,11 @@
 {
   "name": "crystal",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "main": "app.ts",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
-    "build": "tsc -p ."
+    "dev": "cd ./src && nodemon ./app.ts",
+    "build": "tsc -p .",
+    "start": "node ./app.js"
   },
   "author": "Jannik66#0066",
   "license": "ISC",

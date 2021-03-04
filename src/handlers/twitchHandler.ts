@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 
 import { Bot } from '../bot';
 import { Config } from '../entities/config';
-import config from '../config';
 
 export class TwitchHandler {
 
@@ -34,14 +33,14 @@ export class TwitchHandler {
         const twitchTokenConfig = (await this._configRepository.findOne({ where: { key: 'twitchToken' } }));
         if (twitchTokenConfig) this._twitchToken = twitchTokenConfig.value;
 
-        this._twitchChannel = this._client.channels.cache.get(config.twitchStreamChannelID) as TextChannel;
-        this._logChannel = this._bot.getClient().channels.cache.get(config.logChannelID) as TextChannel;
+        this._twitchChannel = this._client.channels.cache.get(this._bot.getConfig().twitchStreamChannelID) as TextChannel;
+        this._logChannel = this._bot.getClient().channels.cache.get(this._bot.getConfig().logChannelID) as TextChannel;
 
         // set up express listeners for webhooks
         this._listenToWebhooks();
 
         // start express app
-        this._app.listen(config.callbackPort);
+        this._app.listen(this._bot.getConfig().callbackPort);
         this._initWebhooks();
     }
 
@@ -103,7 +102,7 @@ export class TwitchHandler {
     private async _subscribeToWebhooks() {
         const body = {
             'hub.mode': 'subscribe',
-            'hub.callback': `http://${config.callbackURL}:${config.callbackPort}/stream`,
+            'hub.callback': `http://${this._bot.getConfig().callbackURL}:${this._bot.getConfig().callbackPort}/stream`,
             'hub.lease_seconds': 864000,
             'hub.topic': ''
         };
@@ -114,11 +113,11 @@ export class TwitchHandler {
             headers: {
                 'content-type': 'application/json',
                 'authorization': `Bearer ${this._twitchToken}`,
-                'client-id': config.twitchClientID
+                'client-id': this._bot.getConfig().twitchClientID
             }
         };
 
-        for (const userId of config.streamIDs) {
+        for (const userId of this._bot.getConfig().streamIDs) {
             body["hub.topic"] = `https://api.twitch.tv/helix/streams?user_id=${userId}`;
             options.body = JSON.stringify(body);
             await fetch(`https://api.twitch.tv/helix/webhooks/hub`, options);
@@ -135,15 +134,15 @@ export class TwitchHandler {
 
     private _sendStreamNotification(data: any) {
         const embed = new MessageEmbed();
-        embed.setColor(config.embedColor);
+        embed.setColor(this._bot.getConfig().embedColor);
         embed.setTitle(`${data.title}`);
-        embed.setDescription(`<@${config.twitchUsers[data.user_id]}> went live!\n\n<:twitch:718751320386830367> [Join here](https://www.twitch.tv/${data.user_name})`);
-        this._twitchChannel.send(`<@&${config.twitchRoleID}>`, embed);
+        embed.setDescription(`<@${this._bot.getConfig().twitchUsers[data.user_id]}> went live!\n\n<:twitch:718751320386830367> [Join here](https://www.twitch.tv/${data.user_name})`);
+        this._twitchChannel.send(`<@&${this._bot.getConfig().twitchRoleID}>`, embed);
     }
 
     // create a new twitch token (app tokens can't be renewed)
     private async _createTwitchToken() {
-        const response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${config.twitchClientID}&client_secret=${config.twitchClientSecret}&grant_type=client_credentials`, { method: 'POST' }).catch(async (err) => {
+        const response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${this._bot.getConfig().twitchClientID}&client_secret=${this._bot.getConfig().twitchClientSecret}&grant_type=client_credentials`, { method: 'POST' }).catch(async (err) => {
             console.error(err);
         });;
         if (!response) {

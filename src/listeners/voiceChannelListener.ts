@@ -1,7 +1,6 @@
 import { VoiceState, VoiceChannel, GuildChannelManager, CategoryChannel } from 'discord.js';
 
 import { Bot } from '../bot';
-import config from '../config';
 
 export class VoiceChannelListener {
 
@@ -22,14 +21,14 @@ export class VoiceChannelListener {
             // if previous state was a channel
             if (oldState.channelID) {
                 // if voice channel is in the dynamic voice category, update usercount for channel
-                if (oldState.channel.parentID === config.dynamicVoiceCategoryID) {
+                if (oldState.channel.parentID === this._bot.getConfig().dynamicVoiceCategoryID) {
                     this._voiceChannels.find(vc => vc.id === oldState.channelID).connectedUserCount--;
                 }
             }
             // if new state was a channel
             if (newState.channelID) {
                 // if voice channel is in the dynamic voice category, update usercount for channel
-                if (newState.channel.parentID === config.dynamicVoiceCategoryID) {
+                if (newState.channel.parentID === this._bot.getConfig().dynamicVoiceCategoryID) {
                     this._voiceChannels.find(vc => vc.id === newState.channelID).connectedUserCount++;
                 }
             }
@@ -42,16 +41,16 @@ export class VoiceChannelListener {
     // init parameters
     public async loadVoiceChannels() {
         // channel manager for creating new channels
-        this._channelManager = new GuildChannelManager(this._bot.getClient().guilds.cache.get(config.guildID));
+        this._channelManager = new GuildChannelManager(this._bot.getClient().guilds.cache.get(this._bot.getConfig().guildID));
 
         // dynamic voice category
-        this._dynamicCategory = this._bot.getClient().channels.cache.get(config.dynamicVoiceCategoryID) as CategoryChannel;
+        this._dynamicCategory = this._bot.getClient().channels.cache.get(this._bot.getConfig().dynamicVoiceCategoryID) as CategoryChannel;
 
         // get all relevant voice channels
         const voicechannels = this._bot.getClient().channels.cache.filter((c) => {
             if (c.type !== 'voice') return false;
             const voiceChannel = c as VoiceChannel;
-            if (voiceChannel.parentID && voiceChannel.parentID === config.dynamicVoiceCategoryID) return true;
+            if (voiceChannel.parentID && voiceChannel.parentID === this._bot.getConfig().dynamicVoiceCategoryID) return true;
             return false;
         });
 

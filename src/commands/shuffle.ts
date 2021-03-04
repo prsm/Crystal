@@ -2,7 +2,6 @@ import { Message, MessageEmbed, MessageReaction, User, CollectorFilter, TextChan
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
-import config from '../config';
 
 export default class shuffleCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -52,7 +51,7 @@ export default class shuffleCommand implements BotCommand {
 
         // create embed with teams
         const embed = new MessageEmbed();
-        embed.setColor(config.embedColor);
+        embed.setColor(this._bot.getConfig().embedColor);
         embed.setTitle('Shuffled Teams');
         teams.forEach((team, i) => embed.addField(`Team ${i + 1}`, team.map(userId => `<@${userId}>`), true));
 
@@ -62,7 +61,7 @@ export default class shuffleCommand implements BotCommand {
         await msg.guild.members.fetch();
 
         const filter = (reaction: MessageReaction, user: User) => {
-            return ['🔀'].includes(reaction.emoji.name) && (msg.guild.members.cache.get(user.id).hasPermission('ADMINISTRATOR') || msg.guild.members.cache.get(user.id).roles.cache.has(config.moderatorRoleID)) && !user.bot;
+            return ['🔀'].includes(reaction.emoji.name) && (msg.guild.members.cache.get(user.id).hasPermission('ADMINISTRATOR') || msg.guild.members.cache.get(user.id).roles.cache.has(this._bot.getConfig().moderatorRoleID)) && !user.bot;
         };
 
         this._awaitMenuReactions(m, filter, teams);
@@ -91,7 +90,7 @@ export default class shuffleCommand implements BotCommand {
     }
 
     private async _moveUsers(teams: string[][], mover: User) {
-        const logChannel = this._client.channels.cache.get(config.logChannelID) as TextChannel;
+        const logChannel = this._client.channels.cache.get(this._bot.getConfig().logChannelID) as TextChannel;
         logChannel.send(`:white_circle: ${mover.tag} (\`${mover.id}\`) moved users with the shuffle command.`);
 
         teams.shift();
@@ -99,10 +98,10 @@ export default class shuffleCommand implements BotCommand {
             const emtpyVoiceChannel = this._client.channels.cache.find((c) => {
                 if (c.type !== 'voice') return false;
                 const vc = c as VoiceChannel;
-                return vc.parentID === config.dynamicVoiceCategoryID && vc.members.size === 0
+                return vc.parentID === this._bot.getConfig().dynamicVoiceCategoryID && vc.members.size === 0
             });
             for (const userID of team) {
-                await this._client.guilds.cache.get(config.guildID).members.cache.get(userID).voice.setChannel(emtpyVoiceChannel, `Shuffle move by ${mover.tag} (${mover.id})`);
+                await this._client.guilds.cache.get(this._bot.getConfig().guildID).members.cache.get(userID).voice.setChannel(emtpyVoiceChannel, `Shuffle move by ${mover.tag} (${mover.id})`);
             }
             await this._delay(500);
         }

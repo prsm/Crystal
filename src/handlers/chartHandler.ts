@@ -2,8 +2,6 @@ import jsdom from 'jsdom';
 import fs from 'fs';
 import jimp from 'jimp';
 
-import config from '../config';
-
 export class ChartHandler {
     private _window: jsdom.DOMWindow;
 
@@ -23,7 +21,7 @@ export class ChartHandler {
         this._window = dom.window;
 
         // Load the chart.js libary into the dom
-        const chartjs = fs.readFileSync(`${config.rootPath}/libraries/Chart.min.js`, { encoding: "utf-8" });
+        const chartjs = fs.readFileSync(`./libraries/Chart.min.js`, { encoding: "utf-8" });
         const scriptElement = this._window.document.createElement('script');
         scriptElement.textContent = chartjs;
         this._window.document.body.appendChild(scriptElement);

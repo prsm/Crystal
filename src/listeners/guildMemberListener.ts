@@ -1,7 +1,6 @@
 import { GuildMember, PartialGuildMember, TextChannel, MessageEmbed } from 'discord.js';
 
 import { Bot } from '../bot';
-import config from '../config';
 
 export class GuildMemberListener {
 
@@ -10,7 +9,7 @@ export class GuildMemberListener {
     constructor(private _bot: Bot) { }
 
     public init() {
-        this._landingChannel = this._bot.getClient().channels.cache.get(config.landingChannelID) as TextChannel;
+        this._landingChannel = this._bot.getClient().channels.cache.get(this._bot.getConfig().landingChannelID) as TextChannel;
     }
 
     public async evalGuildMemberAdd(member: GuildMember | PartialGuildMember) {

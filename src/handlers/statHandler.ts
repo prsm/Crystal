@@ -7,7 +7,6 @@ import { Bot } from '../bot';
 import { Repository } from 'typeorm';
 import { MessageStat } from '../entities/messageStat';
 import { VoiceStat } from '../entities/voiceStat';
-import config from '../config';
 import { UserLevel } from '../entities/userLevel';
 import { MemberCountStat } from '../entities/memberCountStat';
 import { lineChart, barChart } from '../chartConfig';
@@ -59,9 +58,9 @@ export class StatHandler {
             if (msg.author.bot) return;
 
             // if voice channel is not excluded
-            if (!config.levelExcludedTextChannels.includes(msg.channel.id)) {
+            if (!this._bot.getConfig().levelExcludedTextChannels.includes(msg.channel.id)) {
                 this._messageStatRepository.insert({ channelID: msg.channel.id, userID: msg.author.id, timestamp: new Date() });
-                this._addExperience(msg.author.id, config.experiencePerMsg);
+                this._addExperience(msg.author.id, this._bot.getConfig().experiencePerMsg);
             }
         });
     }
@@ -76,9 +75,9 @@ export class StatHandler {
             */
             const voiceChannels = this._client.channels.cache.array().filter((c: any) => {
                 return c.guild
-                    && c.guild.id === config.guildID
+                    && c.guild.id === this._bot.getConfig().guildID
                     && c.type === 'voice'
-                    && !config.levelExcludedVoiceChannels.includes(c.id)
+                    && !this._bot.getConfig().levelExcludedVoiceChannels.includes(c.id)
                     && c.members.filter((m: GuildMember) => !m.user.bot).size > 1
             });
             for (const c of voiceChannels) {
@@ -90,7 +89,7 @@ export class StatHandler {
                     if (m.voice.deaf) return;
 
                     this._voiceStatRepository.insert({ channelID: voiceChannel.id, userID: m.id, timestamp: new Date() });
-                    this._addExperience(m.id, config.experiencePerVoiceMin);
+                    this._addExperience(m.id, this._bot.getConfig().experiencePerVoiceMin);
                 });
             }
         });
@@ -99,7 +98,7 @@ export class StatHandler {
     private _initMemberCountStats() {
         // check membercount every hour
         ns.scheduleJob('0 * * * *', () => {
-            this._memberCountStatRepository.insert({ memberCount: this._client.guilds.cache.get(config.guildID).memberCount, timestamp: new Date() });
+            this._memberCountStatRepository.insert({ memberCount: this._client.guilds.cache.get(this._bot.getConfig().guildID).memberCount, timestamp: new Date() });
         });
     }
 
@@ -123,10 +122,10 @@ export class StatHandler {
         const weekStartDate = moment().weekday(0).hour(0).minute(0).second(0);
         const beforeWeekStartDate = moment(weekStartDate).subtract(7, 'days');
         const embed = new MessageEmbed();
-        const guild = this._client.guilds.cache.get(config.guildID);
+        const guild = this._client.guilds.cache.get(this._bot.getConfig().guildID);
 
         embed.setTitle(`PR1SM Weekly Leaderboard - KW  ${weekStartDate.format('ww')}`);
-        embed.setColor(config.embedColor);
+        embed.setColor(this._bot.getConfig().embedColor);
         embed.setThumbnail(guild.iconURL({ dynamic: true }));
 
         const membersAtWeekStart = await this._memberCountStatRepository.createQueryBuilder('memberCount')
@@ -199,13 +198,13 @@ export class StatHandler {
 
         embed.addField(':trophy:Biggest writers', topMessageMembers.map((tmm, i) => `${this._numbers[i]}<@${tmm.userID}>`), true);
 
-        const botChannel = this._client.channels.cache.get(config.botChannel) as TextChannel;
+        const botChannel = this._client.channels.cache.get(this._bot.getConfig().botChannel) as TextChannel;
 
         // Chart generation
         const fileName = new Date().getTime().toString();
-        const voiceStatFile = `./database/voiceStats${fileName}.png`;
-        const messageStatFile = `./database/messageStats${fileName}.png`;
-        const channelStatFile = `./database/channelStats${fileName}.png`;
+        const voiceStatFile = `${this._bot.getConfig().TempPath}/voiceStats${fileName}.png`;
+        const messageStatFile = `${this._bot.getConfig().TempPath}/messageStats${fileName}.png`;
+        const channelStatFile = `${this._bot.getConfig().TempPath}/channelStats${fileName}.png`;
 
         await this._generateVoiceStatChart(weekStartDate, voiceStatFile);
         await this._generateMessageStatChart(weekStartDate, messageStatFile);

@@ -2,7 +2,6 @@ import { Message, Collection, MessageEmbed, Client } from 'discord.js';
 
 import { Bot } from '../bot';
 import { BotCommand } from '../customInterfaces';
-import config from '../config';
 
 export default class helpCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -30,7 +29,7 @@ export default class helpCommand implements BotCommand {
     public async execute(msg: Message, args: string[]) {
         // set up embed
         let embed = new MessageEmbed();
-        embed.setColor(config.embedColor);
+        embed.setColor(this._bot.getConfig().embedColor);
         embed.setAuthor(`${this._client.user.username}`, this._client.user.avatarURL());
 
         // search for a command to display help for
@@ -52,14 +51,14 @@ export default class helpCommand implements BotCommand {
                 }
                 embed.addField(`Aliases`, `${aliases}`);
             }
-            embed.addField(`Usage`, `\`${config.prefix}${command.information.usage}\``);
+            embed.addField(`Usage`, `\`${this._bot.getConfig().prefix}${command.information.usage}\``);
             if (command.information.examples) {
                 let examples: string;
                 for (let example of command.information.examples) {
                     if (examples) {
-                        examples += `\n\`${config.prefix}${example}\``;
+                        examples += `\n\`${this._bot.getConfig().prefix}${example}\``;
                     } else {
-                        examples = `\`${config.prefix}${example}\``;
+                        examples = `\`${this._bot.getConfig().prefix}${example}\``;
                     }
                 }
                 embed.addField(`Example`, `${examples}`);
@@ -73,16 +72,16 @@ export default class helpCommand implements BotCommand {
         } else {
             // set up general help message
             embed.setTitle(`Commands`);
-            embed.setDescription(`To get detailed information about a command, type \`${config.prefix}help {command}\``);
+            embed.setDescription(`To get detailed information about a command, type \`${this._bot.getConfig().prefix}help {command}\``);
             let fields: {
                 [key: string]: string
             } = {};
             for (const command of this._commands) {
                 if (command[1].information.showInHelp) {
                     if (fields[`${command[1].information.category}`]) {
-                        fields[`${command[1].information.category}`] += `\n**${config.prefix}${command[1].information.name}**\n${command[1].information.description}`;
+                        fields[`${command[1].information.category}`] += `\n**${this._bot.getConfig().prefix}${command[1].information.name}**\n${command[1].information.description}`;
                     } else {
-                        fields[`${command[1].information.category}`] = `**${config.prefix}${command[1].information.name}**\n${command[1].information.description}`;
+                        fields[`${command[1].information.category}`] = `**${this._bot.getConfig().prefix}${command[1].information.name}**\n${command[1].information.description}`;
                     }
                 }
             }
