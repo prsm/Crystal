@@ -1,6 +1,6 @@
 {
   "name": "crystal",
-  "version": "2.3.5",
+  "version": "2.3.6",
   "main": "app.ts",
   "scripts": {
     "dev": "cd ./src && nodemon ./app.ts",
