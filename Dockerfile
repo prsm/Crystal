@@ -8,6 +8,9 @@ RUN npm run build
 
 # create image for production
 FROM node:lts
+
+ENV TZ Europe/Zurich
+
 RUN apt-get update || : && apt-get install python -y
 WORKDIR /crystal
 COPY package*.json ./
