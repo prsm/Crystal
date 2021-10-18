@@ -210,7 +210,7 @@ export class StatHandler {
         await this._generateMessageStatChart(weekStartDate, messageStatFile);
         await this._generateChannelStatChart(weekStartDate, channelStatFile);
 
-        await botChannel.send(`@everyone`, embed);
+        await botChannel.send(`Server Stats for this week:`, embed);
         await botChannel.send([new MessageAttachment(voiceStatFile), new MessageAttachment(messageStatFile), new MessageAttachment(channelStatFile)]);
         // delete chart after sending it to discord
         fs.unlinkSync(voiceStatFile);
