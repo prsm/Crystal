@@ -142,7 +142,7 @@ export default class statCommand implements BotCommand {
             fs.unlinkSync(voiceFilePath);
             fs.unlinkSync(messageFilePath);
         }).catch(() => {
-            msg.channel.send('It seem like you have disabled direct messages from PR1SM. Please enable these so I can send your stats privately.');
+            msg.channel.send('It seem like you have disabled direct messages from SOS. Please enable these so I can send your stats privately.');
             return;
         });
     }
