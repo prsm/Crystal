@@ -124,7 +124,7 @@ export class StatHandler {
         const embed = new MessageEmbed();
         const guild = this._client.guilds.cache.get(this._bot.getConfig().guildID);
 
-        embed.setTitle(`PR1SM Weekly Leaderboard - KW  ${weekStartDate.format('ww')}`);
+        embed.setTitle(`SOS Weekly Leaderboard - KW  ${weekStartDate.format('ww')}`);
         embed.setColor(this._bot.getConfig().embedColor);
         embed.setThumbnail(guild.iconURL({ dynamic: true }));
 

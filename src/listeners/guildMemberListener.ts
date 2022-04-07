@@ -14,8 +14,8 @@ export class GuildMemberListener {
 
     public async evalGuildMemberAdd(member: GuildMember | PartialGuildMember) {
         const embed = new MessageEmbed;
-        embed.setTitle(`Welcome to the PR1SM Discord Server`);
-        embed.setDescription(`${member.toString()}(\`${member.user.tag}\`) joined.\nPR1SM has now \`${member.guild.memberCount}\` members.`)
+        embed.setTitle(`Welcome to the SOS Discord Server`);
+        embed.setDescription(`${member.toString()}(\`${member.user.tag}\`) joined.\nSOS has now \`${member.guild.memberCount}\` members.`)
         embed.setColor(0x28a745);
         embed.setTimestamp(new Date());
         this._landingChannel.send(embed);
@@ -24,7 +24,7 @@ export class GuildMemberListener {
     public async evalGuildMemberRemove(member: GuildMember | PartialGuildMember) {
         const embed = new MessageEmbed;
         embed.setTitle(`${member.displayName} left`);
-        embed.setDescription(`${member.toString()}(\`${member.user.tag}\`) left.\nPR1SM has now \`${member.guild.memberCount}\` members.`)
+        embed.setDescription(`${member.toString()}(\`${member.user.tag}\`) left.\nSOS has now \`${member.guild.memberCount}\` members.`)
         embed.setColor(0xdc3545);
         embed.setTimestamp(new Date());
         this._landingChannel.send(embed);
